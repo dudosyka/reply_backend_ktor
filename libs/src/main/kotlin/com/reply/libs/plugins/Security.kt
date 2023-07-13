@@ -3,6 +3,7 @@ package com.reply.libs.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.reply.libs.config.JwtConfig
+import com.reply.libs.config.RBACConfig
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -13,20 +14,22 @@ fun Application.configureSecurity() {
     // Please read the jwt property from the config file if you are using EngineMain
     val jwtConfig = JwtConfig()
 
+    println(jwtConfig)
+
     val jwtVerifier = JWT
         .require(Algorithm.HMAC256(jwtConfig.secret))
-        .withAudience(jwtConfig.audience)
         .withIssuer(jwtConfig.domain)
         .build()
 
     authentication {
-        jwt("Authorized") {
-            realm = jwtConfig.realm
+        jwt(RBACConfig.AUTHORIZED.toString()) {
             verifier(jwtVerifier)
-            validate { JWTPrincipal(it.payload) }
+            validate {
+                println(it.payload)
+                JWTPrincipal(it.payload)
+            }
         }
-        jwt("Admin role") {
-            realm = jwtConfig.realm
+        jwt(RBACConfig.ADMIN.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
                 val claims = credential.payload.claims
@@ -35,8 +38,7 @@ fun Application.configureSecurity() {
                 } else null
             }
         }
-        jwt("User role") {
-            realm = jwtConfig.realm
+        jwt(RBACConfig.CLIENT.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
                 val claims = credential.payload.claims
@@ -50,10 +52,11 @@ fun Application.configureSecurity() {
 
 fun createToken(claims: MutableMap<String, String>): String {
     val jwtConfig = JwtConfig()
+    println(jwtConfig)
     return JWT.create()
-        .withAudience(jwtConfig.audience)
         .withIssuer(jwtConfig.domain)
-        .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expiration)).apply {
+        .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expiration))
+        .apply {
             claims.forEach {
                 withClaim(it.key, it.value)
             }

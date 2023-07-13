@@ -1,10 +1,12 @@
-package com.reply.libs.consul
+package com.reply.libs.consul.client
 
 import com.orbitz.consul.Consul
-import io.ktor.client.HttpClient
+import com.reply.libs.consul.server.LoadBalancer
+import com.reply.libs.consul.server.takeFirst
+import io.ktor.client.*
 import io.ktor.client.plugins.*
-import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.util.AttributeKey
+import io.ktor.client.request.*
+import io.ktor.util.*
 import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 

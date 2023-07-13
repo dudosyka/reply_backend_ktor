@@ -1,10 +1,10 @@
-package com.reply.libs.consul
+package com.reply.libs.consul.server
 
 import com.orbitz.consul.Consul
 import com.orbitz.consul.model.agent.ImmutableRegistration
 import io.ktor.server.application.*
-import io.ktor.server.engine.ApplicationEngineEnvironment
-import io.ktor.util.AttributeKey
+import io.ktor.server.engine.*
+import io.ktor.util.*
 import kotlin.properties.Delegates
 
 class ConsulFeature private constructor(
