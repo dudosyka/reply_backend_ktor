@@ -22,7 +22,6 @@ class OpenController(override val di: DI) : KodeinController() {
         route(ApiConfig().openEndpoint) {
             get {
                 val result = userClient.get<String>("test", call)
-                println(result)
                 call.respondText("Open part, result: $result")
             }
             post("/auth") {

@@ -62,7 +62,6 @@ class ConsulFeature private constructor(
             fun prop(name: String) = pipeline.environment.config.propertyOrNull(name)?.getString()
 
             val connector = if (pipeline.environment is ApplicationEngineEnvironment) {
-                println((pipeline.environment as ApplicationEngineEnvironment).connectors.getOrNull(0))
                 (pipeline.environment as ApplicationEngineEnvironment).connectors.getOrNull(0)
             } else {
                 null

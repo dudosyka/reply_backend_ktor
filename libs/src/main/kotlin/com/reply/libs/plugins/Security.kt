@@ -11,10 +11,7 @@ import java.util.*
 
 
 fun Application.configureSecurity() {
-    // Please read the jwt property from the config file if you are using EngineMain
     val jwtConfig = JwtConfig()
-
-    println(jwtConfig)
 
     val jwtVerifier = JWT
         .require(Algorithm.HMAC256(jwtConfig.secret))
@@ -25,7 +22,6 @@ fun Application.configureSecurity() {
         jwt(RBACConfig.AUTHORIZED.toString()) {
             verifier(jwtVerifier)
             validate {
-                println(it.payload)
                 JWTPrincipal(it.payload)
             }
         }
@@ -52,7 +48,6 @@ fun Application.configureSecurity() {
 
 fun createToken(claims: MutableMap<String, String>): String {
     val jwtConfig = JwtConfig()
-    println(jwtConfig)
     return JWT.create()
         .withIssuer(jwtConfig.domain)
         .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expiration))
