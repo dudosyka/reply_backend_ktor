@@ -1,4 +1,4 @@
-package com.reply.libs.kodein
+package com.reply.libs.config.kodein
 
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -16,6 +16,7 @@ inline fun <reified T : Any> DI.MainBuilder.bindSingleton(crossinline callback: 
     bind<T>() with singleton { callback(this@singleton.di) }
 }
 
+@Suppress("KDocUnresolvedReference")
 fun Application.kodeinApplication(
     kodeinMapper: DI.MainBuilder.(Application) -> Unit = {}
 ) {

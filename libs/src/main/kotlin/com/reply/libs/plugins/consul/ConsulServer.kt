@@ -1,4 +1,4 @@
-package com.reply.libs.consul.server
+package com.reply.libs.plugins.consul
 
 import com.orbitz.consul.Consul
 import com.orbitz.consul.model.agent.ImmutableRegistration
@@ -7,7 +7,7 @@ import io.ktor.server.engine.*
 import io.ktor.util.*
 import kotlin.properties.Delegates
 
-class ConsulFeature private constructor(
+class ConsulServer private constructor(
     config: Config
 ) {
     init {
@@ -54,10 +54,10 @@ class ConsulFeature private constructor(
         internal operator fun component6() = registrationConfig
     }
 
-    companion object Feature : BaseApplicationPlugin<Application, Config, ConsulFeature> {
-        override val key: AttributeKey<ConsulFeature> = AttributeKey("Consul")
+    companion object Feature : BaseApplicationPlugin<Application, Config, ConsulServer> {
+        override val key: AttributeKey<ConsulServer> = AttributeKey("Consul")
 
-        override fun install(pipeline: Application, configure: Config.() -> Unit): ConsulFeature {
+        override fun install(pipeline: Application, configure: Config.() -> Unit): ConsulServer {
             @Suppress("EXPERIMENTAL_API_USAGE")
             fun prop(name: String) = pipeline.environment.config.propertyOrNull(name)?.getString()
 
@@ -71,7 +71,7 @@ class ConsulFeature private constructor(
             val host = connector?.host ?: "localhost"
             val port = connector?.port ?: prop("ktor.deployment.port")?.toInt() ?: 80
 
-            return ConsulFeature(Config(name, host, port).apply(configure))
+            return ConsulServer(Config(name, host, port).apply(configure))
         }
     }
 }

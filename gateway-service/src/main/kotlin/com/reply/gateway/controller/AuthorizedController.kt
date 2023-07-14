@@ -4,7 +4,7 @@ import com.reply.gateway.service.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.auth.response.AuthorizedUser
-import com.reply.libs.kodein.KodeinController
+import com.reply.libs.config.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*

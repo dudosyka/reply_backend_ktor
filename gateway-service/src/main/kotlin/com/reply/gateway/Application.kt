@@ -5,9 +5,9 @@ import com.reply.gateway.controller.AuthorizedController
 import com.reply.gateway.controller.ClientController
 import com.reply.gateway.controller.OpenController
 import com.reply.gateway.service.UserClient
-import com.reply.libs.consul.server.ConsulFeature
-import com.reply.libs.kodein.bindSingleton
-import com.reply.libs.kodein.kodeinApplication
+import com.reply.libs.plugins.consul.ConsulServer
+import com.reply.libs.config.kodein.bindSingleton
+import com.reply.libs.config.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -33,7 +33,7 @@ fun Application.module() {
             UserClient()
         }
 
-        install(ConsulFeature) {
+        install(ConsulServer) {
             serviceName = "gateway-service"
             host = "localhost"
             port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port

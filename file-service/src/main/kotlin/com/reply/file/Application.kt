@@ -1,4 +1,4 @@
-package com.reply.company
+package com.reply.file
 
 import com.reply.libs.config.kodein.bindSingleton
 import com.reply.libs.config.kodein.kodeinApplication
@@ -17,6 +17,6 @@ fun Application.module() {
     configureValidation()
     responseFilter()
     kodeinApplication {
-        bindSingleton { KtorSimpleLogger("CompanyService") }
+        bindSingleton { KtorSimpleLogger("FileService") }
     }
 }

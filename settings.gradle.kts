@@ -23,6 +23,7 @@ fun service(name: String) = "$name-service"
 rootProject.name = "reply_backend_ktor"
 include("libs")
 include(service("gateway"))
+include(service("file"))
 include(service("user"))
 include(service("company"))
 include(service("test"))

@@ -1,8 +1,8 @@
-package com.reply.libs.consul.client
+package com.reply.libs.plugins.consul
 
 import com.orbitz.consul.Consul
-import com.reply.libs.consul.server.LoadBalancer
-import com.reply.libs.consul.server.takeFirst
+import com.reply.libs.config.consul.LoadBalancer
+import com.reply.libs.config.consul.takeFirst
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 @Suppress("MemberVisibilityCanBePrivate")
-class ConsulClientFeature(private val config: Config) {
+class ConsulClient(private val config: Config) {
     class Config {
         private var loadBalancer: LoadBalancer = takeFirst()
         private var config: Consul.Builder.() -> Unit = {}
@@ -33,14 +33,14 @@ class ConsulClientFeature(private val config: Config) {
         internal operator fun component4() = serviceName
     }
 
-    companion object Feature : HttpClientPlugin<Config, ConsulClientFeature> {
-        private val logger = LoggerFactory.getLogger(ConsulClientFeature::class.java)
+    companion object Feature : HttpClientPlugin<Config, ConsulClient> {
+        private val logger = LoggerFactory.getLogger(ConsulClient::class.java)
 
-        override val key = AttributeKey<ConsulClientFeature>("ConsulClient")
+        override val key = AttributeKey<ConsulClient>("ConsulClient")
 
-        override fun prepare(block: Config.() -> Unit) = ConsulClientFeature(Config().apply(block))
+        override fun prepare(block: Config.() -> Unit) = ConsulClient(Config().apply(block))
 
-        override fun install(plugin: ConsulClientFeature, scope: HttpClient) {
+        override fun install(plugin: ConsulClient, scope: HttpClient) {
             val (loadBalancer, consulConfig, consulUrl, possibleServiceName) = plugin.config
 
             scope.requestPipeline.intercept(HttpRequestPipeline.Render) {

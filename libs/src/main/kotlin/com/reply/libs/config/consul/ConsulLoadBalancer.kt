@@ -1,4 +1,4 @@
-package com.reply.libs.consul.server
+package com.reply.libs.config.consul
 
 import com.orbitz.consul.model.health.ServiceHealth
 

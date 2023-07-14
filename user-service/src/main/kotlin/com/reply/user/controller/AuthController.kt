@@ -2,9 +2,8 @@ package com.reply.user.controller
 
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.auth.request.AuthDto
-import com.reply.libs.dto.auth.response.AuthOutputDto
 import com.reply.libs.dto.auth.response.AuthorizedUser
-import com.reply.libs.kodein.KodeinController
+import com.reply.libs.config.kodein.KodeinController
 import com.reply.user.service.AuthService
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -28,7 +27,7 @@ class AuthController(override val di: DI) : KodeinController() {
         post("/auth") {
             val data = call.receive<AuthDto>()
             logger.info(data.toString())
-            call.respond(AuthOutputDto(authService.authUser(data)))
+            call.respond(authService.authUser(data))
         }
 
         authenticate(RBACConfig.AUTHORIZED.toString()) {
