@@ -32,11 +32,12 @@ class AuthController(override val di: DI) : KodeinController() {
 
         authenticate(RBACConfig.AUTHORIZED.toString()) {
             get("/authorized") {
-                val principal = call.principal<JWTPrincipal>()!!
+                val user = getAuthorized(call.principal<JWTPrincipal>()!!)
                 call.respond<AuthorizedUser>(
                     AuthorizedUser(
-                        principal.getClaim("login", String::class)!!,
-                        principal.getClaim("role", Int::class)!!
+                        user.id,
+                        user.login,
+                        user.role
                     )
                 )
             }
@@ -44,11 +45,12 @@ class AuthController(override val di: DI) : KodeinController() {
 
         authenticate(RBACConfig.ADMIN.toString()) {
             get("/authorized/admin") {
-                val principal = call.principal<JWTPrincipal>()!!
+                val user = getAuthorized(call.principal<JWTPrincipal>()!!)
                 call.respond<AuthorizedUser>(
                     AuthorizedUser(
-                        principal.getClaim("login", String::class)!!,
-                        principal.getClaim("role", Int::class)!!
+                        user.id,
+                        user.login,
+                        user.role
                     )
                 )
             }
@@ -56,11 +58,12 @@ class AuthController(override val di: DI) : KodeinController() {
 
         authenticate(RBACConfig.CLIENT.toString()) {
             get("/authorized/user") {
-                val principal = call.principal<JWTPrincipal>()!!
+                val user = getAuthorized(call.principal<JWTPrincipal>()!!)
                 call.respond<AuthorizedUser>(
                     AuthorizedUser(
-                        principal.getClaim("login", String::class)!!,
-                        principal.getClaim("role", Int::class)!!
+                        user.id,
+                        user.login,
+                        user.role
                     )
                 )
             }

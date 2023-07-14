@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AuthorizedUser(
+    val id: Int,
     val login: String,
     val role: Int,
 )

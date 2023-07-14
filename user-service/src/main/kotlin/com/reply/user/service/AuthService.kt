@@ -25,7 +25,7 @@ class AuthService {
                 if (user.hash == authDto.password) {
                     return@transaction AuthOutputDto(createToken(mutableMapOf(
                         "id" to user.idValue.toString(),
-                        "role" to user.role.toString(),
+                        "role" to user.role.idValue.toString(),
                         "login" to user.login
                     )))
                 } else

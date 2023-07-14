@@ -1,6 +1,9 @@
 package com.reply.libs.config.kodein
 
+import com.reply.libs.dto.internal.AuthorizedUser
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.routing.*
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -20,4 +23,10 @@ abstract class KodeinController : DIAware {
      * Method that subtypes must override to register the handled [Routing] routes.
      */
     abstract fun Routing.registerRoutes()
+
+    fun getAuthorized(principal: JWTPrincipal) = AuthorizedUser(
+        principal.getClaim("id", Int::class)!!,
+        principal.getClaim("login", String::class)!!,
+        principal.getClaim("role", Int::class)!!
+    )
 }
