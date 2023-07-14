@@ -1,7 +1,7 @@
 package com.reply.block
 
-import com.reply.libs.kodein.bindSingleton
-import com.reply.libs.kodein.kodeinApplication
+import com.reply.libs.config.kodein.bindSingleton
+import com.reply.libs.config.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
