@@ -13,7 +13,7 @@ You can do it with your command line
 Or with Idea configuration **Run Configurations --> Run docker dev**
 
 That command will start two containers mariadb and consul server and **exposed 8500** port (for consul) and **3306** port (for mariadb) <br>
-_Note: to edit the default mariadb configuration like login, pw etc go to ./docker/mariadb/Dockerfile_
+_Note: to edit the default mariadb configuration like login, pw etc. go to ./docker/mariadb/Dockerfile_
 
 <br>
 
@@ -52,7 +52,7 @@ Or with idea from <b>Run Configuration</b> menu
 
 ## Project structure
 
-- Structure is from based gradle multiproject 
+- Structure is from based gradle multi project 
 - Microservices located at the root under the appropriate names 
 - Libs module is configuration module also here dto classes are located 
 - Jwt configuration should be past in configuration.conf file at the libs module resources 

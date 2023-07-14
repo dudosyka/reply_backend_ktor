@@ -7,3 +7,5 @@ services:
     build: ./mariadb
     ports:
       - "3306:3306"
+    volumes:
+      - ./mariadb/data:/root
