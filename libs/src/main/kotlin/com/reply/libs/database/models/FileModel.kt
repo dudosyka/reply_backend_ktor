@@ -1,6 +1,6 @@
 package com.reply.libs.database.models
 
-import com.reply.libs.config.database.BaseIntIdTable
+import com.reply.libs.utils.database.BaseIntIdTable
 
 object FileModel: BaseIntIdTable() {
     val path = text("path")

@@ -1,7 +1,7 @@
 package com.reply.libs.database.dao
 
-import com.reply.libs.config.database.BaseIntEntity
-import com.reply.libs.config.database.BaseIntEntityClass
+import com.reply.libs.utils.database.BaseIntEntity
+import com.reply.libs.utils.database.BaseIntEntityClass
 import com.reply.libs.database.models.FileModel
 import org.jetbrains.exposed.dao.id.EntityID
 

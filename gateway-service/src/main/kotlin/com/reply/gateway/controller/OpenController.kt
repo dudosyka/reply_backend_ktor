@@ -1,10 +1,12 @@
 package com.reply.gateway.controller
 
-import com.reply.gateway.service.UserClient
+import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
-import com.reply.libs.dto.auth.request.AuthDto
-import com.reply.libs.dto.auth.response.AuthOutputDto
-import com.reply.libs.config.kodein.KodeinController
+import com.reply.libs.dto.client.auth.AuthInputDto
+import com.reply.libs.dto.client.auth.AuthOutputDto
+import com.reply.libs.dto.client.signup.SignUpInputDto
+import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.utils.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -20,12 +22,16 @@ class OpenController(override val di: DI) : KodeinController() {
      */
     override fun Routing.registerRoutes() {
         route(ApiConfig().openEndpoint) {
-            get {
-                val result = userClient.get<String>("test", call)
-                call.respondText("Open part, result: $result")
-            }
             post("/auth") {
-                val result = userClient.post<AuthDto, AuthOutputDto>("auth", call)
+                val result = userClient.withCall(call) {
+                    post<AuthInputDto, AuthOutputDto>("auth")!!
+                }
+                call.respond(result)
+            }
+            post("/auth/signup") {
+                val result = userClient.withCall(call) {
+                    post<SignUpInputDto, SuccessOutputDto>("auth/admin/signup")!!
+                }
                 call.respond(result)
             }
         }
