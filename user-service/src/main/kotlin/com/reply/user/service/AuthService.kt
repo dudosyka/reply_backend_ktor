@@ -1,38 +1,90 @@
 package com.reply.user.service
 
-import com.reply.libs.config.database.idValue
+import com.reply.libs.config.RBACConfig
+import com.reply.libs.database.dao.FileDao
+import com.reply.libs.database.dao.RoleDao
+import com.reply.libs.utils.database.idValue
 import com.reply.libs.database.models.UserModel
-import com.reply.libs.dto.auth.request.AuthDto
-import com.reply.libs.dto.auth.response.AuthOutputDto
+import com.reply.libs.dto.client.auth.AuthInputDto
+import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.database.dao.UserDao
-import com.reply.libs.dto.exceptions.ForbiddenException
+import com.reply.libs.dto.client.file.CreateFileDto
+import com.reply.libs.dto.client.file.FileDto
+import com.reply.libs.dto.client.signup.SignUpInputDto
+import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.internal.exceptions.DuplicateEntryException
+import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.plugins.createToken
+import com.reply.libs.utils.bcrypt.PasswordUtil
+import com.reply.libs.utils.consul.EmptyBody
+import com.reply.user.consul.FileServiceClient
+import io.ktor.server.application.*
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-class AuthService {
-    fun authUser(authDto: AuthDto): AuthOutputDto {
-//        createToken(mutableMapOf(
-//            "login" to authDto.login,
-//            "role" to "${if (authDto.login == "admin") 1 else if (authDto.login == "client") 2 else 0}"
-//        ))
-        return transaction {
-            val users = UserDao.find {
-                UserModel.login eq authDto.login
-            }.toList()
+class AuthService(override val di: DI) : DIAware {
+    private val fileServiceClient: FileServiceClient by instance()
+    private val companyService: CompanyService by instance()
+    fun authUser(authInputDto: AuthInputDto): AuthOutputDto = transaction {
+        val users = UserDao.find {
+            UserModel.login eq authInputDto.login
+        }.toList()
 
-            if (users.isNotEmpty()) {
-                val user = users.first()
-                if (user.hash == authDto.password) {
-                    return@transaction AuthOutputDto(createToken(mutableMapOf(
-                        "id" to user.idValue.toString(),
-                        "role" to user.role.toString(),
-                        "login" to user.login
-                    )))
-                } else
-                    throw ForbiddenException("Password incorrect")
-
+        if (users.isNotEmpty()) {
+            val user = users.first()
+            if (PasswordUtil.compare(user.hash, authInputDto.password)) {
+                return@transaction AuthOutputDto(createToken(mutableMapOf(
+                    "id" to user.idValue.toString(),
+                    "role" to user.role.idValue.toString(),
+                    "login" to user.login
+                )))
             } else
-                throw ForbiddenException("Login not found")
+                throw ForbiddenException("Password incorrect")
+
+        } else
+            throw ForbiddenException("Login not found")
+    }
+
+    suspend fun signUpAdmin(signUpInputDto: SignUpInputDto, call: ApplicationCall): SuccessOutputDto = newSuspendedTransaction {
+        if (!UserDao.find {
+            (UserModel.login eq signUpInputDto.login) or (UserModel.email eq signUpInputDto.email)
+        }.empty()) throw DuplicateEntryException("Login and Email must be unique")
+
+
+        val company = companyService.create(signUpInputDto.companyData, call)
+        val userLogo = fileServiceClient.withCall(call) {
+            internal {
+                fileServiceClient.post<CreateFileDto, FileDto>("upload", input = signUpInputDto.avatar)!!
+            }
+        }
+
+        commit()
+        try {
+            UserDao.new {
+                login = signUpInputDto.login
+                avatar = FileDao[userLogo.id]
+                hash = PasswordUtil.hash(signUpInputDto.password)
+                fullname = signUpInputDto.fullname
+                phone = signUpInputDto.phone
+                email = signUpInputDto.email
+                role = RoleDao[RBACConfig.ADMIN.roleId]
+                this.company = company
+            }
+            SuccessOutputDto(msg = "Successfully signup")
+        } catch (e: Exception) {
+            fileServiceClient.withCall(call) {
+                internal {
+                    noExceptionBubble {
+                        fileServiceClient.delete<EmptyBody, SuccessOutputDto>("rollback/${userLogo.id}", input = EmptyBody)
+                        fileServiceClient.delete<EmptyBody, SuccessOutputDto>("rollback/${company.idValue}", input = EmptyBody)
+                    }
+                }
+            }
+            throw e
         }
     }
 }

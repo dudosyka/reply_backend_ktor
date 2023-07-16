@@ -1,8 +1,8 @@
 package com.reply.libs.plugins.consul
 
 import com.orbitz.consul.Consul
-import com.reply.libs.config.consul.LoadBalancer
-import com.reply.libs.config.consul.takeFirst
+import com.reply.libs.utils.consul.LoadBalancer
+import com.reply.libs.utils.consul.takeFirst
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*

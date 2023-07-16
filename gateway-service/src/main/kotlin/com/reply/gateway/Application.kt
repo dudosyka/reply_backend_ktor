@@ -4,10 +4,10 @@ import com.reply.gateway.controller.AdminController
 import com.reply.gateway.controller.AuthorizedController
 import com.reply.gateway.controller.ClientController
 import com.reply.gateway.controller.OpenController
-import com.reply.gateway.service.UserClient
+import com.reply.gateway.consul.UserClient
 import com.reply.libs.plugins.consul.ConsulServer
-import com.reply.libs.config.kodein.bindSingleton
-import com.reply.libs.config.kodein.kodeinApplication
+import com.reply.libs.utils.kodein.bindSingleton
+import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -29,9 +29,7 @@ fun Application.module() {
         bindSingleton { AuthorizedController(it) }
         bindSingleton { ClientController(it) }
         bindSingleton { OpenController(it) }
-        bindSingleton {
-            UserClient()
-        }
+        bindSingleton { UserClient(it) }
 
         install(ConsulServer) {
             serviceName = "gateway-service"

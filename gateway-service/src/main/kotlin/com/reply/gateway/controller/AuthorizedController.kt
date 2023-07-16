@@ -1,10 +1,10 @@
 package com.reply.gateway.controller
 
-import com.reply.gateway.service.UserClient
+import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
-import com.reply.libs.dto.auth.response.AuthorizedUser
-import com.reply.libs.config.kodein.KodeinController
+import com.reply.libs.dto.client.auth.AuthorizedUser
+import com.reply.libs.utils.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -23,8 +23,10 @@ class AuthorizedController(override val di: DI) : KodeinController() {
         authenticate(RBACConfig.AUTHORIZED.toString()) {
             route(ApiConfig().authorizedEndpoint) {
                 get {
-                    val result = userClient.get<AuthorizedUser>("authorized", call)
-                    call.respond(result)
+                    val result = userClient.withCall(call) {
+                        get<AuthorizedUser>("authorized")
+                    }
+                    call.respond(result!!)
                 }
             }
         }
