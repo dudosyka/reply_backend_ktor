@@ -1,10 +1,10 @@
 package com.reply.libs.dto.client.company
 
-import com.reply.libs.dto.client.file.CreateFileDto
+import com.reply.libs.dto.client.file.FileCreateDto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateCompanyDto (
+data class CompanyCreateDto (
     val name: String,
-    val logo: CreateFileDto
+    val logo: FileCreateDto
 )

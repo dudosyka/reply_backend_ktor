@@ -11,11 +11,10 @@ import java.util.*
 
 
 fun Application.configureSecurity() {
-    val jwtConfig = JwtConfig()
 
     val jwtVerifier = JWT
-        .require(Algorithm.HMAC256(jwtConfig.secret))
-        .withIssuer(jwtConfig.domain)
+        .require(Algorithm.HMAC256(JwtConfig.secret))
+        .withIssuer(JwtConfig.domain)
         .build()
 
     authentication {
@@ -28,8 +27,9 @@ fun Application.configureSecurity() {
         jwt(RBACConfig.ADMIN.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
-                val claims = credential.payload.claims
-                if ((claims["role"]?.asInt() ?: 0) == 1) {
+                val role = credential.payload.claims["role"]?.asString()?.toInt() ?: 0
+
+                if (role == RBACConfig.ADMIN.roleId) {
                     JWTPrincipal(credential.payload)
                 } else null
             }
@@ -37,8 +37,9 @@ fun Application.configureSecurity() {
         jwt(RBACConfig.CLIENT.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
-                val claims = credential.payload.claims
-                if ((claims["role"]?.asInt() ?: 0) == 2) {
+                val role = credential.payload.claims["role"]?.asString()?.toInt() ?: 0
+
+                if (role == RBACConfig.CLIENT.roleId) {
                     JWTPrincipal(credential.payload)
                 } else null
             }
@@ -47,13 +48,12 @@ fun Application.configureSecurity() {
 }
 
 fun createToken(claims: MutableMap<String, String>): String {
-    val jwtConfig = JwtConfig()
     return JWT.create()
-        .withIssuer(jwtConfig.domain)
-        .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expiration))
+        .withIssuer(JwtConfig.domain)
+        .withExpiresAt(Date(System.currentTimeMillis() + JwtConfig.expiration))
         .apply {
             claims.forEach {
                 withClaim(it.key, it.value)
             }
-        }.sign(Algorithm.HMAC256(jwtConfig.secret))
+        }.sign(Algorithm.HMAC256(JwtConfig.secret))
 }

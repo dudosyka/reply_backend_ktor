@@ -1,5 +1,6 @@
 package com.reply.gateway
 
+import com.reply.gateway.consul.TestClient
 import com.reply.gateway.controller.AdminController
 import com.reply.gateway.controller.AuthorizedController
 import com.reply.gateway.controller.ClientController
@@ -24,12 +25,18 @@ fun Application.module() {
     configureValidation()
     responseFilter()
     kodeinApplication {
-        bindSingleton { KtorSimpleLogger("GatewayService") }
+        //Consul
+        bindSingleton { UserClient(it) }
+        bindSingleton { TestClient(it) }
+
+        //Controllers
         bindSingleton { AdminController(it) }
         bindSingleton { AuthorizedController(it) }
         bindSingleton { ClientController(it) }
         bindSingleton { OpenController(it) }
-        bindSingleton { UserClient(it) }
+
+        //Logger
+        bindSingleton { KtorSimpleLogger("GatewayService") }
 
         install(ConsulServer) {
             serviceName = "gateway-service"
