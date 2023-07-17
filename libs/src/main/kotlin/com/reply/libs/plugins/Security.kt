@@ -28,8 +28,9 @@ fun Application.configureSecurity() {
         jwt(RBACConfig.ADMIN.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
-                val claims = credential.payload.claims
-                if ((claims["role"]?.asInt() ?: 0) == 1) {
+                val role = credential.payload.claims["role"]?.asString()?.toInt() ?: 0
+
+                if (role == RBACConfig.ADMIN.roleId) {
                     JWTPrincipal(credential.payload)
                 } else null
             }
@@ -37,8 +38,9 @@ fun Application.configureSecurity() {
         jwt(RBACConfig.CLIENT.toString()) {
             verifier(jwtVerifier)
             validate { credential ->
-                val claims = credential.payload.claims
-                if ((claims["role"]?.asInt() ?: 0) == 2) {
+                val role = credential.payload.claims["role"]?.asString()?.toInt() ?: 0
+
+                if (role == RBACConfig.CLIENT.roleId) {
                     JWTPrincipal(credential.payload)
                 } else null
             }

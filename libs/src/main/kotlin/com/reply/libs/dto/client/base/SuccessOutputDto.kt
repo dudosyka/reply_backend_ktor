@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class SuccessOutputDto (
     val status: String = "Success",
     val msg: String
-): OutputDto
+)

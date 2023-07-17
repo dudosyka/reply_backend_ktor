@@ -1,5 +1,6 @@
 package com.reply.gateway
 
+import com.reply.gateway.consul.TestClient
 import com.reply.gateway.controller.AdminController
 import com.reply.gateway.controller.AuthorizedController
 import com.reply.gateway.controller.ClientController
@@ -30,6 +31,7 @@ fun Application.module() {
         bindSingleton { ClientController(it) }
         bindSingleton { OpenController(it) }
         bindSingleton { UserClient(it) }
+        bindSingleton { TestClient(it) }
 
         install(ConsulServer) {
             serviceName = "gateway-service"

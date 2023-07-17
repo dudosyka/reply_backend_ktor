@@ -2,7 +2,7 @@ package com.reply.file.controller
 
 import com.reply.file.service.FileService
 import com.reply.libs.config.RBACConfig
-import com.reply.libs.dto.client.file.CreateFileDto
+import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
@@ -24,9 +24,9 @@ class FileController(override val di: DI) : KodeinController() {
         //Only internal requests can be used to send create request without authorization
         post("upload") {
             call.request.headers["Internal-Request"] ?: throw ForbiddenException()
-            val createFileDto = call.receive<CreateFileDto>()
+            val fileCreateDto = call.receive<FileCreateDto>()
 
-            val created = fileService.create(createFileDto)
+            val created = fileService.create(fileCreateDto)
 
             call.respond(created)
         }
@@ -44,8 +44,8 @@ class FileController(override val di: DI) : KodeinController() {
         authenticate(RBACConfig.ADMIN.toString()) {
             route("closed") {
                 post("upload") {
-                    val createFileDto = call.receive<CreateFileDto>()
-                    val created = fileService.create(createFileDto)
+                    val fileCreateDto = call.receive<FileCreateDto>()
+                    val created = fileService.create(fileCreateDto)
 
                     call.respond(created)
                 }

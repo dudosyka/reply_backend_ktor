@@ -2,7 +2,7 @@ package com.reply.file.service
 
 import com.reply.libs.config.FileServiceConfig
 import com.reply.libs.database.dao.FileDao
-import com.reply.libs.dto.client.file.CreateFileDto
+import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.file.FileDto
 import com.reply.libs.utils.database.idValue
 import io.ktor.server.plugins.*
@@ -25,10 +25,10 @@ class FileService(override val di: DI) : DIAware {
         }?.delete() ?: throw NotFoundException()
     }
 
-    fun create(createFileDto: CreateFileDto): FileDto = transaction {
+    fun create(fileCreateDto: FileCreateDto): FileDto = transaction {
 //        val bytes = Base64.getDecoder().decode(createFileDto.base64Encoded)
         val bytes = ByteArray(123)
-        val fileName = generateUniqueName(createFileDto.fileName)
+        val fileName = generateUniqueName(fileCreateDto.fileName)
         val path = Path("${FileServiceConfig().savePath}/$fileName")
 
         path.toFile().writeBytes(bytes)

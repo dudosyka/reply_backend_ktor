@@ -9,8 +9,9 @@ import com.reply.libs.database.models.RoleModel
 import com.reply.libs.database.models.UserModel
 import com.reply.libs.plugins.*
 import com.reply.libs.plugins.consul.ConsulServer
-import com.reply.user.consul.FileServiceClient
+import com.reply.libs.consul.FileServiceClient
 import com.reply.user.controller.AuthController
+import com.reply.user.controller.CheckTokenController
 import com.reply.user.service.AuthService
 import com.reply.user.service.CompanyService
 import io.ktor.server.application.*
@@ -29,6 +30,7 @@ fun Application.module() {
     responseFilter()
     kodeinApplication {
         bindSingleton { AuthController(it) }
+        bindSingleton { CheckTokenController(it) }
         bindSingleton { AuthService(it) }
         bindSingleton { CompanyService(it) }
         bindSingleton { KtorSimpleLogger("UserService") }

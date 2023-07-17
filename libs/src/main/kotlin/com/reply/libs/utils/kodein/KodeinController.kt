@@ -27,6 +27,7 @@ abstract class KodeinController : DIAware {
     fun getAuthorized(principal: JWTPrincipal) = AuthorizedUser(
         principal.getClaim("id", Int::class)!!,
         principal.getClaim("login", String::class)!!,
-        principal.getClaim("role", Int::class)!!
+        principal.getClaim("role", Int::class)!!,
+        principal.getClaim("companyId", Int::class)!!
     )
 }

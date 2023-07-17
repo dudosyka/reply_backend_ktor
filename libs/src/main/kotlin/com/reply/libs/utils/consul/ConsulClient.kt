@@ -1,6 +1,5 @@
 package com.reply.libs.utils.consul
 
-import com.reply.libs.dto.client.base.OutputDto
 import com.reply.libs.dto.internal.exceptions.ClientException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.plugins.consul.ConsulClient
@@ -32,7 +31,7 @@ abstract class ConsulClient(val serviceName: String): DIAware {
     }
     val logger: Logger by instance()
 
-    var exceptionBubbling: Boolean = true
+    var ignoreResult: Boolean = false
     var internal: Boolean = false
     lateinit var envCall: ApplicationCall
 
@@ -43,38 +42,33 @@ abstract class ConsulClient(val serviceName: String): DIAware {
 
             if after error deserialization we also got error throw it out to send 500 to the client
         */
-        return try {
+        return if (ignoreResult) null else try {
             response.body<Output>()
         } catch (e: JsonConvertException) {
-            if (exceptionBubbling) {
-                throw try {
-                    response.body<ClientException>()
-                } catch (e: JsonConvertException) {
-                    InternalServerError("Failed to retrieve $serviceName")
-                }
-            } else {
-                logger.error("Request to service '$serviceName' failed with $e")
-                null
+            throw try {
+                response.body<ClientException>()
+            } catch (e: JsonConvertException) {
+                InternalServerError("Failed to retrieve $serviceName")
             }
         }
     }
 
     suspend fun <Output> withCall(call: ApplicationCall, block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
         envCall = call
-        return block()
+        return try { block() } catch (e: Exception) { logger.info("With call exception $e"); throw e }
     }
 
     suspend fun <Output> internal(block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
         internal = true
-        val result = block()
+        val result = try { block() } catch (e: Exception) { logger.info("Internal exception $e"); throw e }
         internal = false
         return result
     }
 
-    suspend fun <Output> noExceptionBubble(block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
-        exceptionBubbling = false
-        val result = block()
-        exceptionBubbling = true
+    suspend fun <Output> ignoreResult(block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
+        ignoreResult = false
+        val result = try { block() } catch (e: Exception) { logger.info("Ignore result exception $e"); throw e }
+        ignoreResult = true
         return result
     }
 
@@ -86,13 +80,15 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         contentType(ContentType.Application.Json)
     }
 
-    suspend inline fun <reified Input : Any, reified Output : OutputDto> request(
+    suspend inline fun <reified Input : Any, reified Output> request(
         url: String,
         input: Input? = null,
         requestMethod: HttpMethod,
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? {
-        val body = input ?: if (requestMethod != HttpMethod.Get) envCall.receive<Input>() else null
+        var body: Input? = null
+        if (input !is EmptyBody)
+            body = input ?: if (requestMethod != HttpMethod.Get) envCall.receive<Input>() else null
         val response = client.request(url) {
             method = requestMethod
             this.apply(manageRequest(envCall, internal))
@@ -104,24 +100,24 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         return deserializeResponse(response)
     }
 
-    suspend inline fun <reified Output: OutputDto> get(
-        url: String,
-        noinline block: HttpRequestBuilder.() -> Unit = {}
+    suspend inline fun <reified Output> get(
+    url: String,
+    noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Any, Output>(url, requestMethod = HttpMethod.Get, block = block)
 
-    suspend inline fun <reified Input : Any, reified Output: OutputDto> post(
+    suspend inline fun <reified Input : Any, reified Output> post(
         url: String,
         input: Input? = null,
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Input, Output>(url, input = input, requestMethod = HttpMethod.Post, block)
 
-    suspend inline fun <reified Input : Any, reified Output: OutputDto> delete(
+    suspend inline fun <reified Input : Any, reified Output> delete(
         url: String,
         input: Input? = null,
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Input, Output>(url, input = input, requestMethod = HttpMethod.Delete, block)
 
-    suspend inline fun <reified Input : Any, reified Output: OutputDto> patch(
+    suspend inline fun <reified Input : Any, reified Output> patch(
         url: String,
         input: Input? = null,
         noinline block: HttpRequestBuilder.() -> Unit = {}
