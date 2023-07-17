@@ -8,14 +8,13 @@ import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
 import com.reply.libs.utils.database.idValue
+import com.reply.libs.utils.crud.CrudService
 import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
-import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class TestService(override val di: DI) : DIAware {
+class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto>(di, TestModel, TestDao.Companion) {
     private val questionService: QuestionService by instance()
 
     fun create(createDto: TestCreateDto, admin: AuthorizedUser): TestOutputDto = transaction {
@@ -31,18 +30,18 @@ class TestService(override val di: DI) : DIAware {
         test
     }.toOutputDto()
 
-    fun getAll(admin: AuthorizedUser): MutableList<TestOutputDto> = transaction {
-        val query =
-            TestModel.leftJoin(CompanyModel).leftJoin(QuestionTypeModel).leftJoin(MetricModel)
-                .select { (TestModel.company eq admin.companyId) or (TestModel.company eq null) }
-
-        TestDao.wrapRows(query).toMutableList().map {
-            it.toOutputDto()
-        }.toMutableList()
-    }
-
-    fun getOne(testId: Int): TestOutputDto = transaction {
-        TestDao.findById(testId)?.toOutputDto() ?: throw ModelNotFound("Test with id = $testId not found!")
+    fun getAll(admin: AuthorizedUser): List<TestOutputDto> = transaction {
+        getAllWith(
+            {
+                (TestModel.company eq admin.companyId) or
+                (TestModel.company eq null)
+            },
+            {
+                leftJoin(CompanyModel)
+                leftJoin(QuestionTypeModel)
+                leftJoin(MetricModel)
+            }
+        )
     }
 
     fun delete(testId: Int, admin: AuthorizedUser) = transaction {
@@ -54,7 +53,7 @@ class TestService(override val di: DI) : DIAware {
         //If company is null or if user is not from company which is the test parent we should restrict access
         if ((test.company?.idValue ?: 0) != admin.companyId) throw ForbiddenException()
 
-        test.delete()
+        deleteOne(testId)
     }
 
     fun patch(updateDto: TestCreateDto, testId: Int, admin: AuthorizedUser) = transaction {

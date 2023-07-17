@@ -16,7 +16,7 @@ class ClientController(override val di: DI) : KodeinController() {
      */
     override fun Routing.registerRoutes() {
         authenticate(RBACConfig.CLIENT.toString()) {
-            route(ApiConfig().clientEndpoint) {
+            route(ApiConfig.clientEndpoint) {
                 get {
                     call.respondText("Client part")
                 }

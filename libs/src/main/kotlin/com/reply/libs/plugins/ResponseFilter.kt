@@ -3,6 +3,7 @@ package com.reply.libs.plugins
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ClientException
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
+import io.ktor.client.call.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
@@ -22,6 +23,7 @@ fun Application.responseFilter() {
         exception<RequestValidationException> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode.BadRequest,
                     message = BadRequestException(requestValidationException.message ?: "Validation error")
@@ -31,6 +33,7 @@ fun Application.responseFilter() {
         exception<BadRequestKtorException> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode.BadRequest,
                     message = BadRequestException(requestValidationException.rootCause?.message ?: "Validation error")
@@ -40,15 +43,29 @@ fun Application.responseFilter() {
         exception<ClientException> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode(requestValidationException.status, requestValidationException.statusDescription),
                     message = requestValidationException
                 )
             }
         }
+
+        exception<NoTransformationFoundException> {
+            call, requestValidationException -> run {
+                logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
+                call.respond(
+                    status = HttpStatusCode(500, "Internal server error"),
+                    message = ClientException(500, "Internal server error", "Internal communication failed")
+                )
+            }
+        }
+
         exception<EntityNotFoundException> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode(404, "Not found"),
                     message = ModelNotFound(requestValidationException.message ?: "Entity not found")
@@ -58,7 +75,7 @@ fun Application.responseFilter() {
         exception<ExposedSQLException> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
-                logger.info("Stacktrace => ${requestValidationException.stackTraceToString()}")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode(500, "Internal server error"),
                     message = ClientException(500, "Internal server error", requestValidationException.message ?: "error")
@@ -68,7 +85,7 @@ fun Application.responseFilter() {
         exception<Exception> {
             call, requestValidationException -> run {
                 logger.info("Request ${call.request.path()} was failed cause to $requestValidationException")
-                logger.info("Stacktrace => ${requestValidationException.stackTraceToString()}")
+                logger.debug("Stacktrace => ${requestValidationException.stackTraceToString()}")
                 call.respond(
                     status = HttpStatusCode(500, "Internal server error"),
                     message = ClientException(500, "Internal server error", requestValidationException.message ?: "error")

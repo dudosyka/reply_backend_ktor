@@ -1,5 +1,6 @@
 package com.reply.libs.consul
 
+import com.reply.libs.config.ApiConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.file.FileDto
@@ -9,7 +10,7 @@ import io.ktor.server.application.*
 import org.kodein.di.DI
 
 
-class FileServiceClient(override val di: DI) : ConsulClient("file") {
+class FileServiceClient(override val di: DI) : ConsulClient(ApiConfig.fileServiceName) {
     suspend fun uploadFile(call: ApplicationCall, file: FileCreateDto) =
         withCall(call) {
             internal {

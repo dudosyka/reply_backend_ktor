@@ -21,10 +21,10 @@ class OpenController(override val di: DI) : KodeinController() {
      * Method that subtypes must override to register the handled [Routing] routes.
      */
     override fun Routing.registerRoutes() {
-        route(ApiConfig().openEndpoint) {
+        route(ApiConfig.openEndpoint) {
             post("/auth") {
                 val result = userClient.withCall(call) {
-                    post<AuthInputDto, AuthOutputDto>("auth")!!
+                    post<AuthInputDto, AuthOutputDto>()!!
                 }
                 call.respond(result)
             }

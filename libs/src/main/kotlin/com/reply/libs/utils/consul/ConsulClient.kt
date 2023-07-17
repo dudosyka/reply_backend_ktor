@@ -1,5 +1,6 @@
 package com.reply.libs.utils.consul
 
+import com.reply.libs.config.ApiConfig
 import com.reply.libs.dto.internal.exceptions.ClientException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.plugins.consul.ConsulClient
@@ -34,6 +35,14 @@ abstract class ConsulClient(val serviceName: String): DIAware {
     var ignoreResult: Boolean = false
     var internal: Boolean = false
     lateinit var envCall: ApplicationCall
+
+    //Current call request uri
+    val curUri: String
+        get() = envCall.request.uri
+                    .removePrefix(ApiConfig.adminEndpoint)
+                    .removePrefix(ApiConfig.clientEndpoint)
+                    .removePrefix(ApiConfig.openEndpoint)
+                    .removePrefix(ApiConfig.mainEndpoint)
 
     suspend inline fun <reified Output> deserializeResponse(response: HttpResponse): Output? {
         /*
@@ -104,6 +113,9 @@ abstract class ConsulClient(val serviceName: String): DIAware {
     url: String,
     noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Any, Output>(url, requestMethod = HttpMethod.Get, block = block)
+    suspend inline fun <reified Output> get(
+        noinline block: HttpRequestBuilder.() -> Unit = {}
+    ): Output? = request<Any, Output>(curUri, requestMethod = HttpMethod.Get, block = block)
 
     suspend inline fun <reified Input : Any, reified Output> post(
         url: String,
@@ -111,15 +123,30 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Input, Output>(url, input = input, requestMethod = HttpMethod.Post, block)
 
+    suspend inline fun <reified Input : Any, reified Output> post(
+        input: Input? = null,
+        noinline block: HttpRequestBuilder.() -> Unit = {}
+    ): Output? = request<Input, Output>(curUri, input = input, requestMethod = HttpMethod.Post, block)
+
     suspend inline fun <reified Input : Any, reified Output> delete(
         url: String,
         input: Input? = null,
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Input, Output>(url, input = input, requestMethod = HttpMethod.Delete, block)
 
+    suspend inline fun <reified Input : Any, reified Output> delete(
+        input: Input? = null,
+        noinline block: HttpRequestBuilder.() -> Unit = {}
+    ): Output? = request<Input, Output>(curUri, input = input, requestMethod = HttpMethod.Delete, block)
+
     suspend inline fun <reified Input : Any, reified Output> patch(
         url: String,
         input: Input? = null,
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? = request<Input, Output>(url, input = input, requestMethod = HttpMethod.Patch, block)
+
+    suspend inline fun <reified Input : Any, reified Output> patch(
+        input: Input? = null,
+        noinline block: HttpRequestBuilder.() -> Unit = {}
+    ): Output? = request<Input, Output>(curUri, input = input, requestMethod = HttpMethod.Patch, block)
 }

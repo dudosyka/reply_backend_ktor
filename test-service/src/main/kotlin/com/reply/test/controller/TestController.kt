@@ -10,7 +10,6 @@ import com.reply.libs.utils.kodein.KodeinController
 import com.reply.test.service.TestService
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -28,7 +27,7 @@ class TestController(override val di: DI) : KodeinController() {
             //CRUD Endpoints
             route("test") {
                 get {
-                    call.respond<MutableList<TestOutputDto>>(testService.getAll(getAuthorized(call.principal<JWTPrincipal>()!!)))
+                    call.respond<List<TestOutputDto>>(testService.getAll(getAuthorized(call)))
                 }
                 get("{id}") {
                     val testId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
@@ -36,17 +35,17 @@ class TestController(override val di: DI) : KodeinController() {
                 }
                 post {
                     val createDto = call.receive<TestCreateDto>()
-                    call.respond<TestOutputDto>(testService.create(createDto, getAuthorized(call.principal<JWTPrincipal>()!!)))
+                    call.respond<TestOutputDto>(testService.create(createDto, getAuthorized(call)))
                 }
                 delete("{id}") {
                     val testId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    testService.delete(testId, getAuthorized(call.principal<JWTPrincipal>()!!))
+                    testService.delete(testId, getAuthorized(call))
                     call.respond<SuccessOutputDto>(SuccessOutputDto("success", "Test successfully removed"))
                 }
                 patch("{id}") {
                     val testId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
                     val updateDto = call.receive<TestCreateDto>()
-                    val result = testService.patch(updateDto, testId, getAuthorized(call.principal<JWTPrincipal>()!!))
+                    val result = testService.patch(updateDto, testId, getAuthorized(call))
                     if (result)
                         call.respond<SuccessOutputDto>(SuccessOutputDto("success", "Test successfully updated"))
                     else

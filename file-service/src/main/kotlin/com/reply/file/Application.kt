@@ -2,6 +2,7 @@ package com.reply.file
 
 import com.reply.file.controller.FileController
 import com.reply.file.service.FileService
+import com.reply.libs.config.ApiConfig
 import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
@@ -22,13 +23,18 @@ fun Application.module() {
     configureValidation()
     responseFilter()
     kodeinApplication {
+        //Controllers
         bindSingleton { FileController(it) }
+
+        //Services
         bindSingleton { FileService(it) }
+
+        //Logger
         bindSingleton { KtorSimpleLogger("FileService") }
     }
     DatabaseConnector {}
     install(ConsulServer) {
-        serviceName = "file"
+        serviceName = ApiConfig.fileServiceName
         host = "localhost"
         port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
         consulUrl = "http://localhost:8500"

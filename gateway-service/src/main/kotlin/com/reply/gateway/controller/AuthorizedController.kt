@@ -21,7 +21,7 @@ class AuthorizedController(override val di: DI) : KodeinController() {
      */
     override fun Routing.registerRoutes() {
         authenticate(RBACConfig.AUTHORIZED.toString()) {
-            route(ApiConfig().authorizedEndpoint) {
+            route(ApiConfig.authorizedEndpoint) {
                 get {
                     val result = userClient.withCall(call) {
                         get<AuthorizedUserOutput>("authorized")

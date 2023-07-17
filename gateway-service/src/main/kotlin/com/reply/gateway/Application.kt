@@ -25,13 +25,18 @@ fun Application.module() {
     configureValidation()
     responseFilter()
     kodeinApplication {
-        bindSingleton { KtorSimpleLogger("GatewayService") }
+        //Consul
+        bindSingleton { UserClient(it) }
+        bindSingleton { TestClient(it) }
+
+        //Controllers
         bindSingleton { AdminController(it) }
         bindSingleton { AuthorizedController(it) }
         bindSingleton { ClientController(it) }
         bindSingleton { OpenController(it) }
-        bindSingleton { UserClient(it) }
-        bindSingleton { TestClient(it) }
+
+        //Logger
+        bindSingleton { KtorSimpleLogger("GatewayService") }
 
         install(ConsulServer) {
             serviceName = "gateway-service"

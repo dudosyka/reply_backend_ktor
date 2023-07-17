@@ -1,5 +1,6 @@
 package com.reply.test
 
+import com.reply.libs.config.ApiConfig
 import com.reply.libs.database.models.MetricModel
 import com.reply.libs.database.models.QuestionModel
 import com.reply.libs.database.models.QuestionTypeModel
@@ -28,13 +29,18 @@ fun Application.module() {
     responseFilter()
     DatabaseConnector(QuestionTypeModel, MetricModel, TestModel, QuestionModel) {}
     kodeinApplication {
-        bindSingleton { KtorSimpleLogger("TestService") }
+        //Controllers
         bindSingleton { TestController(it) }
+
+        //Services
         bindSingleton { TestService(it) }
         bindSingleton { QuestionService(it) }
+
+        //Logger
+        bindSingleton { KtorSimpleLogger("TestService") }
     }
     install(ConsulServer) {
-        serviceName = "test"
+        serviceName = ApiConfig.testServiceName
         host = "localhost"
         port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
         consulUrl = "http://localhost:8500"

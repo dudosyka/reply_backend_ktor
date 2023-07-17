@@ -11,11 +11,10 @@ import java.util.*
 
 
 fun Application.configureSecurity() {
-    val jwtConfig = JwtConfig()
 
     val jwtVerifier = JWT
-        .require(Algorithm.HMAC256(jwtConfig.secret))
-        .withIssuer(jwtConfig.domain)
+        .require(Algorithm.HMAC256(JwtConfig.secret))
+        .withIssuer(JwtConfig.domain)
         .build()
 
     authentication {
@@ -49,13 +48,12 @@ fun Application.configureSecurity() {
 }
 
 fun createToken(claims: MutableMap<String, String>): String {
-    val jwtConfig = JwtConfig()
     return JWT.create()
-        .withIssuer(jwtConfig.domain)
-        .withExpiresAt(Date(System.currentTimeMillis() + jwtConfig.expiration))
+        .withIssuer(JwtConfig.domain)
+        .withExpiresAt(Date(System.currentTimeMillis() + JwtConfig.expiration))
         .apply {
             claims.forEach {
                 withClaim(it.key, it.value)
             }
-        }.sign(Algorithm.HMAC256(jwtConfig.secret))
+        }.sign(Algorithm.HMAC256(JwtConfig.secret))
 }
