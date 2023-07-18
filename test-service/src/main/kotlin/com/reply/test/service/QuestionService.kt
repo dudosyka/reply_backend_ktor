@@ -5,6 +5,7 @@ import com.reply.libs.database.models.QuestionModel
 import com.reply.libs.dto.client.question.QuestionCreateDto
 import com.reply.libs.dto.client.question.QuestionOutputDto
 import com.reply.libs.utils.crud.CrudService
+import com.reply.libs.utils.crud.asDto
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 
