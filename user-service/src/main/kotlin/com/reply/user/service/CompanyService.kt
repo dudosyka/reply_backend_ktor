@@ -2,6 +2,7 @@ package com.reply.user.service
 
 import com.reply.libs.consul.FileServiceClient
 import com.reply.libs.database.dao.CompanyDao
+import com.reply.libs.database.dao.FileDao
 import com.reply.libs.database.models.CompanyModel
 import com.reply.libs.database.models.GroupModel
 import com.reply.libs.database.models.UserModel
@@ -40,9 +41,9 @@ class CompanyService(override val di: DI) : CrudService<CompanyOutputDto, Compan
         }
     }
 
-    fun getOne(companyId: Int, authorizedUser: AuthorizedUser): CompanyOutputDto = transaction {
+    fun getOne(companyId: Int, authorizedUser: AuthorizedUser): CompanyDao = transaction {
         if (authorizedUser.companyId == companyId)
-            getOne(companyId).asDto()
+            getOne(companyId)
         else
             throw ForbiddenException()
     }
@@ -59,5 +60,32 @@ class CompanyService(override val di: DI) : CrudService<CompanyOutputDto, Compan
         getOne(companyId, authorizedUser)
 
         groupService.getAll { GroupModel.company eq companyId }.asDto()
+    }
+
+    suspend fun update(companyId: Int, companyUpdateDto: CompanyCreateDto, call: ApplicationCall, authorizedUser: AuthorizedUser): CompanyOutputDto = newSuspendedTransaction {
+        if (companyId != authorizedUser.companyId)
+            throw ForbiddenException()
+
+        val companyLogo = fileServiceClient.uploadFile(call, companyUpdateDto.logo)
+
+        try {
+            val company = getOne(companyId, authorizedUser)
+            val oldLogo = company.logoId.value
+
+            commit()
+
+            company.apply {
+                name = companyUpdateDto.name
+                logo = FileDao[companyLogo.id]
+            }
+
+            company.flush()
+            commit()
+            fileServiceClient.rollbackUploading(call, oldLogo)
+            company.asDto()
+        } catch (e: Exception) {
+            fileServiceClient.rollbackUploading(call, companyLogo.id)
+            throw e
+        }
     }
 }

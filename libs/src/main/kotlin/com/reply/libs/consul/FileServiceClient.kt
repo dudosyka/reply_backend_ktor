@@ -3,7 +3,7 @@ package com.reply.libs.consul
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.file.FileCreateDto
-import com.reply.libs.dto.client.file.FileDto
+import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.utils.consul.ConsulClient
 import com.reply.libs.utils.consul.EmptyBody
 import io.ktor.server.application.*
@@ -14,7 +14,7 @@ class FileServiceClient(override val di: DI) : ConsulClient(ApiConfig.fileServic
     suspend fun uploadFile(call: ApplicationCall, file: FileCreateDto) =
         withCall(call) {
             internal {
-                post<FileCreateDto, FileDto>("upload", input = file)!!
+                post<FileCreateDto, FileOutputDto>("upload", input = file)!!
             }
         }
 

@@ -75,9 +75,9 @@ abstract class ConsulClient(val serviceName: String): DIAware {
     }
 
     suspend fun <Output> ignoreResult(block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
-        ignoreResult = false
-        val result = try { block() } catch (e: Exception) { logger.info("Ignore result exception $e"); throw e }
         ignoreResult = true
+        val result = try { block() } catch (e: Exception) { logger.info("Ignore result exception $e"); throw e }
+        ignoreResult = false
         return result
     }
 
