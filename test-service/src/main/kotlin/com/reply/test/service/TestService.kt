@@ -1,20 +1,23 @@
 package com.reply.test.service
 
 import com.reply.libs.database.dao.*
-import com.reply.libs.database.models.*
+import com.reply.libs.database.models.CompanyModel
+import com.reply.libs.database.models.MetricModel
+import com.reply.libs.database.models.QuestionTypeModel
+import com.reply.libs.database.models.TestModel
 import com.reply.libs.dto.client.test.TestCreateDto
 import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
-import com.reply.libs.utils.database.idValue
 import com.reply.libs.utils.crud.CrudService
+import com.reply.libs.utils.database.idValue
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto>(di, TestModel, TestDao.Companion) {
+class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(di, TestModel, TestDao.Companion) {
     private val questionService: QuestionService by instance()
 
     fun create(createDto: TestCreateDto, admin: AuthorizedUser): TestOutputDto = transaction {
@@ -41,7 +44,7 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto>(di, TestMo
                 leftJoin(QuestionTypeModel)
                 leftJoin(MetricModel)
             }
-        )
+        ).asDto()
     }
 
     fun delete(testId: Int, admin: AuthorizedUser) = transaction {

@@ -1,21 +1,20 @@
 package com.reply.user
 
 import com.reply.libs.config.ApiConfig
-import com.reply.libs.database.models.CompanyModel
+import com.reply.libs.consul.FileServiceClient
+import com.reply.libs.database.models.*
+import com.reply.libs.plugins.*
+import com.reply.libs.plugins.consul.ConsulServer
 import com.reply.libs.utils.database.DatabaseConnector
 import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
-import com.reply.libs.database.models.FileModel
-import com.reply.libs.database.models.RoleModel
-import com.reply.libs.database.models.UserModel
-import com.reply.libs.plugins.*
-import com.reply.libs.plugins.consul.ConsulServer
-import com.reply.libs.consul.FileServiceClient
 import com.reply.user.controller.AuthController
 import com.reply.user.controller.CheckTokenController
 import com.reply.user.controller.CompanyController
+import com.reply.user.controller.GroupController
 import com.reply.user.service.AuthService
 import com.reply.user.service.CompanyService
+import com.reply.user.service.GroupService
 import com.reply.user.service.UserService
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -39,17 +38,19 @@ fun Application.module() {
         bindSingleton { AuthController(it) }
         bindSingleton { CheckTokenController(it) }
         bindSingleton { CompanyController(it) }
+        bindSingleton { GroupController(it) }
 
         //Services
         bindSingleton { AuthService(it) }
         bindSingleton { CompanyService(it) }
+        bindSingleton { GroupService(it) }
         bindSingleton { UserService(it) }
 
         //Logger
         bindSingleton { KtorSimpleLogger("UserService") }
 
     }
-    DatabaseConnector(UserModel, RoleModel, FileModel, CompanyModel) {}
+    DatabaseConnector(UserModel, RoleModel, FileModel, CompanyModel, GroupModel, GroupUsersModel) {}
     install(ConsulServer) {
         serviceName = ApiConfig.userServiceName
         host = "localhost"

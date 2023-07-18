@@ -8,7 +8,7 @@ import com.reply.libs.utils.crud.CrudService
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 
-class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDto>(di, UserModel, UserDao.Companion) {
+class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDto, UserDao>(di, UserModel, UserDao.Companion) {
     fun create(userCreateDto: UserCreateDto) = transaction {
         insert(userCreateDto) {
             this[UserModel.login] = it.login
@@ -21,4 +21,6 @@ class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDt
             this[UserModel.company] = it.company
         }
     }
+
+    fun getByIds(ids: List<Int>): List<UserOutputDto> = getAll { UserModel.id inList ids }.asDto()
 }

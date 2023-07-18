@@ -3,8 +3,8 @@ package com.reply.libs.dto.client.company
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CompanyOutputDto (
+data class CompanyUserDto (
     val id: Int,
-    val name: String,
-    val logo: Int
+    val login: String,
+    val fullname: String
 )
