@@ -5,14 +5,17 @@ import com.reply.libs.database.models.CompanyModel
 import com.reply.libs.database.models.MetricModel
 import com.reply.libs.database.models.QuestionTypeModel
 import com.reply.libs.database.models.TestModel
+import com.reply.libs.dto.client.test.TestCheckPermissionsDto
 import com.reply.libs.dto.client.test.TestCreateDto
 import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.dto.internal.AuthorizedUser
+import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
 import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
@@ -38,7 +41,7 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         getAllWith(
             {
                 (TestModel.company eq admin.companyId) or
-                (TestModel.company eq null)
+                        (TestModel.company eq null)
             },
             {
                 leftJoin(CompanyModel)
@@ -46,6 +49,10 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
                 leftJoin(MetricModel)
             }
         ).asDto()
+    }
+
+    fun getByBlock(blockId: Int): List<TestOutputDto> = transaction {
+        BlockDao.findById(blockId)?.tests?.asDto() ?: throw BadRequestException()
     }
 
     fun delete(testId: Int, admin: AuthorizedUser) = transaction {
@@ -84,4 +91,10 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         test.flush()
     }
 
+    fun checkPermissions(authorizedUser: AuthorizedUser, permissionsDto: TestCheckPermissionsDto) {
+        TestDao.find {
+            (TestModel.company eq authorizedUser.companyId) and
+                    (TestModel.id inList permissionsDto.tests)
+        }.apply { if (count() != permissionsDto.tests.size.toLong()) throw ForbiddenException() }
+    }
 }

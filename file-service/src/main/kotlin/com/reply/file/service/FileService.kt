@@ -6,6 +6,7 @@ import com.reply.libs.database.models.FileModel
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.utils.crud.CrudService
+import com.reply.libs.utils.crud.asDto
 import io.ktor.server.plugins.*
 import io.ktor.util.date.*
 import org.jetbrains.exposed.sql.transactions.transaction

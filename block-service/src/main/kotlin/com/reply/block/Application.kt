@@ -1,5 +1,8 @@
 package com.reply.block
 
+import com.reply.block.controller.BlockController
+import com.reply.block.service.BlockService
+import com.reply.gateway.consul.TestClient
 import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
@@ -17,6 +20,13 @@ fun Application.module() {
     configureValidation()
     responseFilter()
     kodeinApplication {
+        //Consul
+        bindSingleton { TestClient(it) }
+        //Services
+        bindSingleton { BlockService(it) }
+        //Controllers
+        bindSingleton { BlockController(it) }
+        //Logger
         bindSingleton { KtorSimpleLogger("BlockService") }
     }
 }
