@@ -22,5 +22,5 @@ class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDt
         }
     }
 
-    fun getByIds(ids: List<Int>): List<UserOutputDto> = getAll { UserModel.id inList ids }.asDto()
+    fun getByIds(ids: List<Int>) = getAll { UserModel.id inList ids }
 }

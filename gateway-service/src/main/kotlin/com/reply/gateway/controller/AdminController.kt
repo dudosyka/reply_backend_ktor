@@ -7,7 +7,6 @@ import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
 import com.reply.libs.dto.client.group.GroupCreateClientDto
-import com.reply.libs.dto.client.group.GroupCreateDto
 import com.reply.libs.dto.client.group.GroupOutputClientDto
 import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.dto.client.test.TestCreateDto
@@ -105,7 +104,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     }
                     post {
                         val result = userClient.withCall(call) {
-                            post<GroupCreateClientDto, GroupOutputDto>()!!
+                            post<GroupCreateClientDto, GroupOutputClientDto>()!!
                         }
                         call.respond(result)
                     }
@@ -119,7 +118,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     patch("{id}") {
                         val result = userClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<GroupCreateDto, SuccessOutputDto>()!!
+                            patch<GroupCreateClientDto, GroupOutputClientDto>()!!
                         }
                         call.respond(result)
                     }

@@ -12,6 +12,7 @@ import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.utils.crud.CrudService
+import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
