@@ -5,6 +5,8 @@ import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.company.CompanyCreateDto
+import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
 import com.reply.libs.dto.client.group.GroupCreateClientDto
 import com.reply.libs.dto.client.group.GroupOutputClientDto
@@ -85,6 +87,12 @@ class AdminController(override val di: DI) : KodeinController() {
                             }
                             call.respond(result)
                         }
+                    }
+                    patch {
+                        val result = userClient.withCall(call) {
+                            patch<CompanyCreateDto, CompanyOutputDto>()!!
+                        }
+                        call.respond(result)
                     }
                 }
 

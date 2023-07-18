@@ -1,13 +1,15 @@
 package com.reply.user.controller
 
 import com.reply.libs.config.RBACConfig
+import com.reply.libs.dto.client.company.CompanyCreateDto
+import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
 import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.user.service.CompanyService
-import com.reply.user.service.GroupService
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.kodein.di.DI
@@ -15,7 +17,6 @@ import org.kodein.di.instance
 
 class CompanyController(override val di: DI) : KodeinController() {
     private val companyService: CompanyService by instance()
-    private val groupService: GroupService by instance()
     /**
      * Method that subtypes must override to register the handled [Routing] routes.
      */
@@ -34,6 +35,10 @@ class CompanyController(override val di: DI) : KodeinController() {
                         val authorizedUser = getAuthorized(call)
                         call.respond<List<GroupOutputDto>>(companyService.getGroups(authorizedUser.companyId, authorizedUser))
                     }
+                }
+                patch {
+                    val authorizedUser = getAuthorized(call)
+                    call.respond<CompanyOutputDto>(companyService.update(authorizedUser.companyId, call.receive<CompanyCreateDto>(), call, authorizedUser))
                 }
             }
         }
