@@ -8,7 +8,7 @@ import com.reply.libs.utils.crud.CrudService
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 
-class QuestionService(override val di: DI): CrudService<QuestionOutputDto, QuestionCreateDto>(di, QuestionModel, QuestionDao.Companion)  {
+class QuestionService(override val di: DI): CrudService<QuestionOutputDto, QuestionCreateDto, QuestionDao>(di, QuestionModel, QuestionDao.Companion)  {
     fun createBatch(testId: Int, questions: MutableList<QuestionCreateDto>): List<QuestionOutputDto> = transaction {
         insert(questions) {
             this[QuestionModel.title] = it.title
@@ -17,7 +17,7 @@ class QuestionService(override val di: DI): CrudService<QuestionOutputDto, Quest
             this[QuestionModel.relative_id] = it.relative_id
             this[QuestionModel.value] = QuestionDao.encodeValue(it.value)
             this[QuestionModel.coins] = it.coins
-        }
+        }.asDto()
     }
 
     fun updateForTest(testId: Int, questions: MutableList<QuestionCreateDto>) = transaction {

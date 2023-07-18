@@ -5,10 +5,13 @@ import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.company.CompanyUserDto
+import com.reply.libs.dto.client.group.GroupCreateClientDto
+import com.reply.libs.dto.client.group.GroupCreateDto
+import com.reply.libs.dto.client.group.GroupOutputClientDto
+import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.dto.client.test.TestCreateDto
 import com.reply.libs.dto.client.test.TestOutputDto
-import com.reply.libs.dto.client.test.TestUpdateDto
-import com.reply.libs.dto.client.user.UserOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.utils.consul.EmptyBody
 import com.reply.libs.utils.kodein.KodeinController
@@ -21,8 +24,8 @@ import org.kodein.di.instance
 
 //Controller for admin-part of application
 class AdminController(override val di: DI) : KodeinController() {
-    val testClient: TestClient by instance()
-    val userClient: UserClient by instance()
+    private val testClient: TestClient by instance()
+    private val userClient: UserClient by instance()
     /**
      * Method that subtypes must override to register the handled [Routing] routes.
      */
@@ -60,7 +63,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     patch("{id}") {
                         val result = testClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<TestUpdateDto, SuccessOutputDto>()!!
+                            patch<TestCreateDto, SuccessOutputDto>()!!
                         }
                         call.respond(result)
                     }
@@ -71,11 +74,54 @@ class AdminController(override val di: DI) : KodeinController() {
                     route("users") {
                         get {
                             val result = userClient.withCall(call) {
-                                curUri
-                                get<List<UserOutputDto>>()!!
+                                get<List<CompanyUserDto>>()!!
                             }
                             call.respond(result)
                         }
+                    }
+                    route("groups") {
+                        get {
+                            val result = userClient.withCall(call) {
+                                get<List<GroupOutputDto>>()!!
+                            }
+                            call.respond(result)
+                        }
+                    }
+                }
+
+                route("group") {
+                    get {
+                        val result = userClient.withCall(call) {
+                            get<List<GroupOutputDto>>()!!
+                        }
+                        call.respond(result)
+                    }
+                    get("{id}") {
+                        val result = userClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            get<GroupOutputClientDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                    post {
+                        val result = userClient.withCall(call) {
+                            post<GroupCreateClientDto, GroupOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                    delete("{id}") {
+                        val result = userClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            delete<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                        }
+                        call.respond(result)
+                    }
+                    patch("{id}") {
+                        val result = userClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            patch<GroupCreateDto, SuccessOutputDto>()!!
+                        }
+                        call.respond(result)
                     }
                 }
             }

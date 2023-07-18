@@ -1,5 +1,7 @@
 package com.reply.libs.utils.crud
 
+import com.reply.libs.dto.internal.exceptions.ModelNotFound
+import com.reply.libs.utils.database.BaseIntEntity
 import com.reply.libs.utils.database.BaseIntEntityClass
 import com.reply.libs.utils.database.BaseIntIdTable
 import org.jetbrains.exposed.sql.*
@@ -9,17 +11,33 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 
 @Suppress("UNCHECKED_CAST")
-open class CrudService<Output, Create>(override val di: DI, val model: BaseIntIdTable, val dao: BaseIntEntityClass<Output, *>) : DIAware {
-    open fun getOne(id: Int) = transaction {
-        dao[id].toOutputDto() as Output
+open class CrudService<Output, Create, Dao>(override val di: DI, private val model: BaseIntIdTable, val dao: BaseIntEntityClass<Output, *>) : DIAware {
+
+    fun <Entity> List<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
+    fun <Entity> SizedIterable<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
+    fun <Entity> BaseIntEntity<Entity>.asDto() = this.toOutputDto() as Output
+
+    open fun getOne(id: Int): Dao = transaction {
+        dao[id] as Dao
     }
 
-    fun getAll(filter: SqlExpressionBuilder.() -> Op<Boolean> = { Op.nullOp() }) = transaction {
-        dao.wrapQuery(model.select(filter))
+    fun getOneWith(id: Int, settings: BaseIntIdTable.() -> Unit): Dao = transaction {
+        val result = getAllWith({
+            model.id eq id
+        }, settings)
+
+        if (result.isEmpty())
+            throw ModelNotFound()
+
+        result.first()
     }
 
-    fun getAllWith(filter: SqlExpressionBuilder.() -> Op<Boolean> = { Op.nullOp() }, settings: BaseIntIdTable.() -> Unit) = transaction {
-        dao.wrapQuery(model.apply(settings).select(filter))
+    fun getAll(filter: SqlExpressionBuilder.() -> Op<Boolean> = { Op.nullOp() }): List<Dao> = transaction {
+        dao.wrapRows(model.select(filter)).map { it as Dao }
+    }
+
+    fun getAllWith(filter: SqlExpressionBuilder.() -> Op<Boolean> = { Op.nullOp() }, settings: BaseIntIdTable.() -> Unit): List<Dao> = transaction {
+        dao.wrapRows(model.apply(settings).select(filter)).map { it as Dao }
     }
 
     fun deleteOne(id: Int) = transaction {
@@ -32,11 +50,11 @@ open class CrudService<Output, Create>(override val di: DI, val model: BaseIntId
         }
     }
 
-    fun insert(data: List<Create>, body: BatchInsertStatement.(Create) -> Unit) = transaction {
+    fun insert(data: List<Create>, body: BatchInsertStatement.(Create) -> Unit): List<Dao> = transaction {
         model.batchInsert(data) {
             body(this, it)
         }.map {
-            dao.wrapRow(it).toOutputDto() as Output
+            dao.wrapRow(it) as Dao
         }
     }
 

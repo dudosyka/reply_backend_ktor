@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import kotlin.io.path.Path
 
-class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDto>(di, FileModel, FileDao.Companion) {
+class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDto, FileDao>(di, FileModel, FileDao.Companion) {
     private fun generateUniqueName(fileName: String): String {
         val ext = fileName.split(".").last()
 
@@ -35,6 +35,6 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
 
         insert(fileCreateDto) {
             this[FileModel.path] = fileName
-        }
+        }.asDto()
     }
 }
