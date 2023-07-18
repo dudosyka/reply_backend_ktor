@@ -13,10 +13,6 @@ import org.kodein.di.DIAware
 @Suppress("UNCHECKED_CAST")
 open class CrudService<Output, Create, Dao>(override val di: DI, private val model: BaseIntIdTable, val dao: BaseIntEntityClass<Output, *>) : DIAware {
 
-    fun <Entity> List<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
-    fun <Entity> SizedIterable<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
-    fun <Entity> BaseIntEntity<Entity>.asDto() = this.toOutputDto() as Output
-
     open fun getOne(id: Int): Dao = transaction {
         dao[id] as Dao
     }
@@ -60,3 +56,7 @@ open class CrudService<Output, Create, Dao>(override val di: DI, private val mod
 
     fun insert(data: Create, body: BatchInsertStatement.(Create) -> Unit) = insert(listOf(data), body).first()
 }
+
+fun <Entity> List<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
+fun <Entity> SizedIterable<BaseIntEntity<Entity>>.asDto() = this.map { it.toOutputDto() }
+fun <Entity> BaseIntEntity<Entity>.asDto() = this.toOutputDto()
