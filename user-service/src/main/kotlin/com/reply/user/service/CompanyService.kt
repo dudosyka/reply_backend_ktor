@@ -16,8 +16,6 @@ import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
 import io.ktor.server.application.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -25,7 +23,7 @@ class CompanyService(override val di: DI) : CrudService<CompanyOutputDto, Compan
     private val fileServiceClient: FileServiceClient by instance()
     private val userService: UserService by instance()
     private val groupService: GroupService by instance()
-    suspend fun create(companyCreateDto: CompanyCreateDto, call: ApplicationCall): CompanyOutputDto = newSuspendedTransaction {
+    suspend fun create(companyCreateDto: CompanyCreateDto, call: ApplicationCall): CompanyOutputDto = transaction {
         val companyLogo = fileServiceClient.uploadFile(call, companyCreateDto.logo)
 
         commit()
@@ -41,28 +39,28 @@ class CompanyService(override val di: DI) : CrudService<CompanyOutputDto, Compan
         }
     }
 
-    fun getOne(companyId: Int, authorizedUser: AuthorizedUser): CompanyDao = transaction {
+    suspend fun getOne(companyId: Int, authorizedUser: AuthorizedUser): CompanyDao = transaction {
         if (authorizedUser.companyId == companyId)
             getOne(companyId)
         else
             throw ForbiddenException()
     }
 
-    fun getUsers(companyId: Int, authorizedUser: AuthorizedUser): List<CompanyUserDto> = transaction {
+    suspend fun getUsers(companyId: Int, authorizedUser: AuthorizedUser): List<CompanyUserDto> = transaction {
         //Check is not Forbidden
         getOne(companyId, authorizedUser)
 
         userService.getAll { UserModel.company eq companyId }.map { CompanyUserDto(it.idValue, it.login, it.fullname) }
     }
 
-    fun getGroups(companyId: Int, authorizedUser: AuthorizedUser): List<GroupOutputDto> = transaction {
+    suspend fun getGroups(companyId: Int, authorizedUser: AuthorizedUser): List<GroupOutputDto> = transaction {
         //Check is not Forbidden
         getOne(companyId, authorizedUser)
 
         groupService.getAll { GroupModel.company eq companyId }.asDto()
     }
 
-    suspend fun update(companyId: Int, companyUpdateDto: CompanyCreateDto, call: ApplicationCall, authorizedUser: AuthorizedUser): CompanyOutputDto = newSuspendedTransaction {
+    suspend fun update(companyId: Int, companyUpdateDto: CompanyCreateDto, call: ApplicationCall, authorizedUser: AuthorizedUser): CompanyOutputDto = transaction {
         if (companyId != authorizedUser.companyId)
             throw ForbiddenException()
 
