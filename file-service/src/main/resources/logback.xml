@@ -10,4 +10,5 @@
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="com.reply.plugins.configureMonitoring" lavel="trace" />
+    <logger name="org.mariadb.jdbc.client.impl.StandardClient" lavel="trace" />
 </configuration>
