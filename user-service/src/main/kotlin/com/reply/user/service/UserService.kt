@@ -5,11 +5,10 @@ import com.reply.libs.database.models.UserModel
 import com.reply.libs.dto.client.user.UserCreateDto
 import com.reply.libs.dto.client.user.UserOutputDto
 import com.reply.libs.utils.crud.CrudService
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 
 class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDto, UserDao>(di, UserModel, UserDao.Companion) {
-    fun create(userCreateDto: UserCreateDto) = transaction {
+    fun create(userCreateDto: UserCreateDto): UserDao =
         insert(userCreateDto) {
             this[UserModel.login] = it.login
             this[UserModel.avatar] = it.avatar
@@ -20,7 +19,6 @@ class UserService(override val di: DI) : CrudService<UserOutputDto, UserCreateDt
             this[UserModel.role] = it.role
             this[UserModel.company] = it.company
         }
-    }
 
     fun getByIds(ids: List<Int>) = getAll { UserModel.id inList ids }
 }

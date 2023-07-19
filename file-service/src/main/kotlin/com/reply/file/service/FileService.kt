@@ -9,7 +9,6 @@ import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
 import io.ktor.server.plugins.*
 import io.ktor.util.date.*
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import kotlin.io.path.Path
 
@@ -19,14 +18,14 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
 
         return "${getTimeMillis()}.$ext"
     }
-    fun remove(fileId: Int) = transaction {
+    suspend fun remove(fileId: Int) = transaction {
         FileDao.findById(fileId)?.apply {
-            val path = Path("${FileServiceConfig.savePath}/$path")
-            path.toFile().delete()
+            Path("${FileServiceConfig.savePath}/${path}").toFile().delete()
         }?.delete() ?: throw NotFoundException()
+        commit()
     }
 
-    fun create(fileCreateDto: FileCreateDto): FileOutputDto = transaction {
+    suspend fun create(fileCreateDto: FileCreateDto): FileOutputDto = transaction {
 //        val bytes = Base64.getDecoder().decode(createFileDto.base64Encoded)
         val bytes = ByteArray(123)
         val fileName = generateUniqueName(fileCreateDto.fileName)
@@ -34,8 +33,10 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
 
         path.toFile().writeBytes(bytes)
 
-        insert(fileCreateDto) {
+        val result = insert(fileCreateDto) {
             this[FileModel.path] = fileName
-        }.asDto()
+        }
+        commit()
+        result.asDto()
     }
 }

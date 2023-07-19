@@ -51,7 +51,11 @@ abstract class ConsulClient(val serviceName: String): DIAware {
 
             if after error deserialization we also got error throw it out to send 500 to the client
         */
-        return if (ignoreResult) null else try {
+        return if (ignoreResult) {
+            val result = response.bodyAsText()
+            logger.info("Request with ignore result received: $result")
+            null
+        } else try {
             response.body<Output>()
         } catch (e: JsonConvertException) {
             throw try {
@@ -96,6 +100,9 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         noinline block: HttpRequestBuilder.() -> Unit = {}
     ): Output? {
         var body: Input? = null
+//        if (requestMethod != HttpMethod.Get) {
+//            body = input ?:
+//        }
         if (input !is EmptyBody)
             body = input ?: if (requestMethod != HttpMethod.Get) envCall.receive<Input>() else null
         val response = client.request(url) {
