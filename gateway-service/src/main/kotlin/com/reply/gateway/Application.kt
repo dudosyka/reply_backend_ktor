@@ -1,5 +1,6 @@
 package com.reply.gateway
 
+import com.reply.gateway.consul.BlockClient
 import com.reply.gateway.consul.TestClient
 import com.reply.gateway.controller.AdminController
 import com.reply.gateway.controller.AuthorizedController
@@ -28,6 +29,7 @@ fun Application.module() {
         //Consul
         bindSingleton { UserClient(it) }
         bindSingleton { TestClient(it) }
+        bindSingleton { BlockClient(it) }
 
         //Controllers
         bindSingleton { AdminController(it) }

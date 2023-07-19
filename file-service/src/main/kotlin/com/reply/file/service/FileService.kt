@@ -29,7 +29,7 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
 //        val bytes = Base64.getDecoder().decode(createFileDto.base64Encoded)
         val bytes = ByteArray(123)
         val fileName = generateUniqueName(fileCreateDto.fileName)
-        val path = Path("${FileServiceConfig.savePath}/$fileName")
+        val path = Path("${FileServiceConfig.savePath}$fileName")
 
         path.toFile().writeBytes(bytes)
 
