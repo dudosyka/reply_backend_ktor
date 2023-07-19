@@ -1,10 +1,13 @@
 package com.reply.gateway.controller
 
+import com.reply.gateway.consul.BlockClient
 import com.reply.gateway.consul.TestClient
 import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.block.BlockCreateDto
+import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
@@ -27,6 +30,7 @@ import org.kodein.di.instance
 class AdminController(override val di: DI) : KodeinController() {
     private val testClient: TestClient by instance()
     private val userClient: UserClient by instance()
+    private val blockClient: BlockClient by instance()
     /**
      * Method that subtypes must override to register the handled [Routing] routes.
      */
@@ -127,6 +131,43 @@ class AdminController(override val di: DI) : KodeinController() {
                         val result = userClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
                             patch<GroupCreateClientDto, GroupOutputClientDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                }
+
+                //Block-service routing
+                route("block"){
+                    get{
+                        val result = blockClient.withCall(call) {
+                            get<MutableList<BlockOutputDto>>()!!
+                        }
+                        call.respond(result)
+                    }
+                    get("{id}"){
+                        val result = blockClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            get<BlockOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                    post {
+                        val result = blockClient.withCall(call) {
+                            post<BlockCreateDto, BlockOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                    patch("{id}") {
+                        val result = blockClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            patch<BlockCreateDto, BlockOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
+                    delete("{id}") {
+                        val result = blockClient.withCall(call) {
+                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                            delete<EmptyBody, SuccessOutputDto>(EmptyBody)!!
                         }
                         call.respond(result)
                     }

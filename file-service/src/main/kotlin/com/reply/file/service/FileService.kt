@@ -21,7 +21,7 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
     }
     fun remove(fileId: Int) = transaction {
         FileDao.findById(fileId)?.apply {
-            val path = Path("${FileServiceConfig.savePath}/$path")
+            val path = Path("${FileServiceConfig.savePath}$path")
             path.toFile().delete()
         }?.delete() ?: throw NotFoundException()
     }
@@ -30,7 +30,7 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
 //        val bytes = Base64.getDecoder().decode(createFileDto.base64Encoded)
         val bytes = ByteArray(123)
         val fileName = generateUniqueName(fileCreateDto.fileName)
-        val path = Path("${FileServiceConfig.savePath}/$fileName")
+        val path = Path("${FileServiceConfig.savePath}$fileName")
 
         path.toFile().writeBytes(bytes)
 

@@ -92,9 +92,12 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
     }
 
     fun checkPermissions(authorizedUser: AuthorizedUser, permissionsDto: TestCheckPermissionsDto) {
-        TestDao.find {
-            (TestModel.company eq authorizedUser.companyId) and
-                    (TestModel.id inList permissionsDto.tests)
-        }.apply { if (count() != permissionsDto.tests.size.toLong()) throw ForbiddenException() }
+        transaction {
+            TestDao.find {
+                (TestModel.company eq authorizedUser.companyId) and
+                        (TestModel.id inList permissionsDto.tests)
+
+            }.apply { if (count() != permissionsDto.tests.size.toLong()) throw ForbiddenException() }
+        }
     }
 }
