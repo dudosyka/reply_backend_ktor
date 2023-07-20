@@ -17,14 +17,13 @@ import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.instance
 
 class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(di, TestModel, TestDao.Companion) {
     private val questionService: QuestionService by instance()
 
-    fun create(createDto: TestCreateDto, admin: AuthorizedUser): TestOutputDto = transaction {
+    suspend fun create(createDto: TestCreateDto, admin: AuthorizedUser): TestOutputDto = transaction {
         val test = TestDao.new {
             title = createDto.title
             type = QuestionTypeDao[createDto.type]
@@ -37,7 +36,7 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         test
     }.toOutputDto()
 
-    fun getAll(admin: AuthorizedUser): List<TestOutputDto> = transaction {
+    suspend fun getAll(admin: AuthorizedUser): List<TestOutputDto> = transaction {
         getAllWith(
             {
                 (TestModel.company eq admin.companyId) or
@@ -51,11 +50,11 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         ).asDto()
     }
 
-    fun getByBlock(blockId: Int): List<TestOutputDto> = transaction {
+    suspend fun getByBlock(blockId: Int): List<TestOutputDto> = transaction {
         BlockDao.findById(blockId)?.tests?.asDto() ?: throw BadRequestException()
     }
 
-    fun delete(testId: Int, admin: AuthorizedUser) = transaction {
+    suspend fun delete(testId: Int, admin: AuthorizedUser) = transaction {
         val test = TestDao.findById(testId) ?: throw ModelNotFound("Test with id = $testId not found!")
 
         //If author is null test is 'built-in' and it is protected from removing
@@ -67,7 +66,7 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         deleteOne(testId)
     }
 
-    fun patch(updateDto: TestCreateDto, testId: Int, admin: AuthorizedUser) = transaction {
+    suspend fun patch(updateDto: TestCreateDto, testId: Int, admin: AuthorizedUser) = transaction {
         val test = TestDao.findById(testId) ?: throw ModelNotFound("Test with id = $testId not found!")
 
         //If author is null test is 'built-in' and it is protected from removing
@@ -91,13 +90,15 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         test.flush()
     }
 
-    fun checkPermissions(authorizedUser: AuthorizedUser, permissionsDto: TestCheckPermissionsDto) {
+    suspend fun checkPermissions(authorizedUser: AuthorizedUser, permissionsDto: TestCheckPermissionsDto) {
         transaction {
             TestDao.find {
                 (TestModel.company eq authorizedUser.companyId) and
                         (TestModel.id inList permissionsDto.tests)
 
-            }.apply { if (count() != permissionsDto.tests.size.toLong()) throw ForbiddenException() }
+            }.apply { if (count() != permissionsDto.tests.size.toLong()) throw ForbiddenException(
+                "Some of these tests are not available to the user"
+            ) }
         }
     }
 }

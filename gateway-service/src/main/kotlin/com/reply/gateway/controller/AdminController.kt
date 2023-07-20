@@ -5,9 +5,11 @@ import com.reply.gateway.consul.TestClient
 import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
+import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.block.BlockCreateDto
 import com.reply.libs.dto.client.block.BlockOutputDto
+import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
@@ -160,7 +162,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     patch("{id}") {
                         val result = blockClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<BlockCreateDto, BlockOutputDto>()!!
+                            patch<BlockCreateDto, SuccessOutputDto>()!!
                         }
                         call.respond(result)
                     }
@@ -168,6 +170,12 @@ class AdminController(override val di: DI) : KodeinController() {
                         val result = blockClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
                             delete<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                        }
+                        call.respond(result)
+                    }
+                    post("token") {
+                        val  result = blockClient.withCall(call){
+                            post<BlockTokenDto, AuthOutputDto>()!!
                         }
                         call.respond(result)
                     }
