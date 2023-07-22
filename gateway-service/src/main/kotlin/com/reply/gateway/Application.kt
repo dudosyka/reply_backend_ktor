@@ -43,11 +43,8 @@ fun Application.module() {
         install(ConsulServer) {
             serviceName = "gateway-service"
             host = "localhost"
-            port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
+            port = 80
             consulUrl = "http://localhost:8500"
-            config {
-                port = (environment as ApplicationEngineEnvironment).connectors.first().port
-            }
             registrationConfig {
 //                check(Registration.RegCheck.http("$host:$port${ApiConfig().openEndpoint}/user/health", 120))
             }

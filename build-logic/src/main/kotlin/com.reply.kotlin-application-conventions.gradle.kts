@@ -48,6 +48,7 @@ dependencies {
     implementation(ktor("serialization-kotlinx-json"))
     implementation(ktor("client-content-negotiation"))
     testImplementation(ktor("server-tests-jvm"))
+    testImplementation(ktor("server-test-host"))
 
 
     implementation("com.orbitz.consul:consul-client:$consulClientVersion")
@@ -72,5 +73,5 @@ dependencies {
 
     implementation("org.mindrot:jbcrypt:0.4")
 
-    testImplementation(jet("kotlin-test-junit"))
+    testImplementation(jet("kotlin-test"))
 }

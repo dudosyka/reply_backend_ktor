@@ -63,14 +63,13 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
                     avatar = userLogo.id
                 }
             )
-            SuccessOutputDto(msg = "Successfully signup")
         } catch (e: ExposedSQLException) {
             rollback()
             fileServiceClient.rollbackUploading(call, company.logo)
             fileServiceClient.rollbackUploading(call, userLogo.id)
             throw e
         }
-
-        SuccessOutputDto("", "")
+        commit()
+        SuccessOutputDto(status = "success", msg = "Successfully signup")
     }
 }
