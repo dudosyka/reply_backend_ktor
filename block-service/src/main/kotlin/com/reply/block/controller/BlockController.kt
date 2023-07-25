@@ -2,9 +2,11 @@ package com.reply.block.controller
 
 import com.reply.block.service.BlockService
 import com.reply.libs.config.RBACConfig
+import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.block.BlockCreateDto
 import com.reply.libs.dto.client.block.BlockOutputDto
+import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.utils.kodein.KodeinController
@@ -44,8 +46,16 @@ class BlockController(override val di : DI) : KodeinController() {
                 }
                 delete("{id}") {
                     val blockId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    blockService.delete(blockId, getAuthorized(call))
-                    call.respond<SuccessOutputDto>(SuccessOutputDto("success", "Block successfully removed"))
+                    val authorizedUser = getAuthorized(call)
+                    call.respond<SuccessOutputDto>(blockService.delete(blockId, authorizedUser))
+                }
+                post("token") {
+                    val blockTokenDto = call.receive<BlockTokenDto>()
+                    call.respond<AuthOutputDto>(blockService.getToken(blockTokenDto.userId, blockTokenDto.week, blockTokenDto.blockId, call))
+                }
+                get("company/{companyId}"){
+                    val companyId = call.parameters["companyId"]?.toIntOrNull() ?: throw BadRequestException()
+                    call.respond<List<BlockOutputDto>>(blockService.getAllByCompany(companyId))
                 }
             }
         }

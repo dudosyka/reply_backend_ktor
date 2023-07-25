@@ -4,6 +4,7 @@ import com.reply.libs.dto.client.auth.AuthInputDto
 import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.signup.SignUpInputClientDto
+import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.libs.dto.client.signup.SignUpInputDto
 import com.reply.user.service.AuthService
@@ -37,6 +38,11 @@ class AuthController(override val di: DI) : KodeinController() {
                 call.respond<SuccessOutputDto>(authService.signUpClient(data, call))
             }
         }
-
+        route("token"){
+            post("block") {
+                val data = call.receive<BlockTokenDto>()
+                call.respond(authService.getToken(data))
+            }
+        }
     }
 }

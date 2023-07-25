@@ -14,6 +14,7 @@ import com.reply.libs.plugins.createToken
 import com.reply.libs.utils.bcrypt.PasswordUtil
 import com.reply.libs.consul.FileServiceClient
 import com.reply.libs.dto.client.signup.SignUpInputClientDto
+import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.utils.database.TransactionalService
 import io.ktor.server.application.*
 import org.jetbrains.exposed.exceptions.ExposedSQLException
@@ -47,6 +48,27 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
             throw ForbiddenException("Login not found")
     }
 
+    suspend fun getToken(data : BlockTokenDto) : AuthOutputDto = transaction{
+        try {
+            val user = UserDao.find { UserModel.id eq data.userId }.toList().first()
+            AuthOutputDto(
+                createToken(
+                    mutableMapOf(
+                        "blockId" to data.blockId.toString(),
+                        "week" to data.week.toString(),
+                        "userId" to data.userId.toString(),
+                        "id" to user.idValue.toString(),
+                        "role" to user.role.idValue.toString(),
+                        "login" to user.login,
+                        "companyId" to user.company.idValue.toString()
+                    )
+                )
+            )
+        }catch (e : NoSuchElementException){
+            throw ForbiddenException("User not found")
+        }
+    }
+    
     private fun checkUnique(login: String, email: String, ) {
         if (!UserDao.find {
                 (UserModel.login eq login) or (UserModel.email eq email)

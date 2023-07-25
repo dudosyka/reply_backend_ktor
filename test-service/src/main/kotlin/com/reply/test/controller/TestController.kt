@@ -60,6 +60,10 @@ class TestController(override val di: DI) : KodeinController() {
                     testService.checkPermissions(getAuthorized(call), call.receive<TestCheckPermissionsDto>())
                     call.respond<SuccessOutputDto>(SuccessOutputDto("success", "")) //bob
                 }
+                get("company/{companyId}"){
+                    val companyID = call.parameters["companyId"]?.toIntOrNull() ?: throw BadRequestException()
+                    call.respond<List<TestOutputDto>>(testService.getAllByCompany(companyID))
+                }
             }
         }
     }
