@@ -54,8 +54,13 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
 
     suspend fun update(groupId: Int, groupUpdateDto: GroupCreateClientDto, authorizedUser: AuthorizedUser): GroupOutputClientDto = transaction {
         getOne(groupId, authorizedUser).apply {
+            val clients = userService.getByIds(groupUpdateDto.users).map {
+                if (it.companyId != authorizedUser.companyId)
+                    throw ForbiddenException()
+                it
+            }
             name = groupUpdateDto.name
-            users = SizedCollection(userService.getByIds(groupUpdateDto.users))
+            users = SizedCollection(clients)
             flush()
         }.toClientOutput()
     }

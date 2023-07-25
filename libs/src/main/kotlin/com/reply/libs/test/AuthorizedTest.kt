@@ -1,6 +1,5 @@
 package com.reply.libs.test
 
-import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.plugins.createToken
 import io.ktor.client.*
@@ -62,4 +61,5 @@ open class AuthorizedTest: BaseTest() {
             }
         }
     }
+
 }

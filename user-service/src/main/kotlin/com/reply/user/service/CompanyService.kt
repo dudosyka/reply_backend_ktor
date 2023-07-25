@@ -86,4 +86,11 @@ class CompanyService(override val di: DI) : CrudService<CompanyOutputDto, Compan
             throw e
         }
     }
+
+    fun get(companyId: Int, authorizedUser: AuthorizedUser): CompanyOutputDto {
+        if (companyId != authorizedUser.companyId)
+            throw ForbiddenException()
+
+        return CompanyDao[companyId].asDto()
+    }
 }

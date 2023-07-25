@@ -92,6 +92,12 @@ class AdminController(override val di: DI) : KodeinController() {
                             call.respond(result)
                         }
                     }
+                    get {
+                        val result = userClient.withCall(call) {
+                            get<CompanyOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
                     patch {
                         val result = userClient.withCall(call) {
                             patch<CompanyCreateDto, CompanyOutputDto>()!!

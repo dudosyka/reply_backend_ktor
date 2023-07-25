@@ -1,6 +1,9 @@
 package com.reply.user.controller
 
 import com.reply.libs.dto.client.auth.AuthInputDto
+import com.reply.libs.dto.client.auth.AuthOutputDto
+import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.signup.SignUpInputClientDto
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.libs.dto.client.signup.SignUpInputDto
 import com.reply.user.service.AuthService
@@ -21,12 +24,17 @@ class AuthController(override val di: DI) : KodeinController() {
             post {
                 val data = call.receive<AuthInputDto>()
                 logger.info(data.toString())
-                call.respond(authService.authUser(data))
+                call.respond<AuthOutputDto>(authService.authUser(data))
             }
 
             post("/admin/signup") {
                 val data = call.receive<SignUpInputDto>()
-                call.respond(authService.signUpAdmin(data, call))
+                call.respond<SuccessOutputDto>(authService.signUpAdmin(data, call))
+            }
+
+            post("/client/signup") {
+                val data = call.receive<SignUpInputClientDto>()
+                call.respond<SuccessOutputDto>(authService.signUpClient(data, call))
             }
         }
 
