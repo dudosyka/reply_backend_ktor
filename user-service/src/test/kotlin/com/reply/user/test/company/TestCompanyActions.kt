@@ -44,9 +44,7 @@ class TestCompanyActions: AuthorizedTest() {
     @Test
     fun `Test success new company creation`() {
         runBlocking {
-            val response = testClient.get(globalEndpoint) {
-                contentType(ContentType.Application.Json)
-            }
+            val response = testClient.get(globalEndpoint)
 
             assertEquals(HttpStatusCode.OK, response.status)
 

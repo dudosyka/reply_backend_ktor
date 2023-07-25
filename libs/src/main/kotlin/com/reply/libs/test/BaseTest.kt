@@ -11,6 +11,9 @@ import com.reply.libs.dto.client.signup.SignUpInputDto
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.apache.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -26,6 +29,9 @@ open class BaseTest {
     protected open var client = HttpClient(Apache) {
         install(ContentNegotiation) {
             json()
+        }
+        defaultRequest {
+            header("Content-Type", "application/json")
         }
     }
 
@@ -87,7 +93,7 @@ open class BaseTest {
             )
         }
 
-    suspend fun authorizeClient(login: String, password: String): HttpClient {
+    private suspend fun authorizeClient(login: String, password: String): HttpClient {
         val response = login(login, password)
         val responseBody = response.body<AuthOutputDto>()
 
@@ -95,12 +101,19 @@ open class BaseTest {
             install(ContentNegotiation) {
                 json()
             }
-            headers {
-                set("Authorization", "Bearer ${responseBody.token}")
-                set("Content-Type", "application/json")
+            defaultRequest {
+                header("Content-Type", "application/json")
+            }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        BearerTokens(responseBody.token, responseBody.token)
+                    }
+                }
             }
         }
     }
+
     suspend fun newAdminRoleClient(
         login: String = "login${LocalDateTime.now()}",
         password: String = "hash",

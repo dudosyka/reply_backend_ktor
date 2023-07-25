@@ -39,16 +39,18 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
     }
     suspend fun create(groupCreateDto: GroupCreateClientDto, authorizedUser: AuthorizedUser): GroupOutputClientDto = transaction {
         val groupUsers = userService.getByIds(groupCreateDto.users)
-        GroupDao.new {
+        val model = GroupDao.new {
             name = groupCreateDto.name
             company = CompanyDao[authorizedUser.companyId]
             users = SizedCollection(groupUsers)
-        }.toClientOutput()
+        }
+        commit()
+        model.toClientOutput()
     }
 
     suspend fun delete(groupId: Int, authorizedUser: AuthorizedUser): SuccessOutputDto = transaction {
         getOne(groupId, authorizedUser).delete()
-
+        commit()
         SuccessOutputDto("success", "Group successfully deleted")
     }
 
@@ -62,6 +64,7 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
             name = groupUpdateDto.name
             users = SizedCollection(clients)
             flush()
+            commit()
         }.toClientOutput()
     }
 
@@ -90,6 +93,8 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
 
         group.flush()
 
+        commit()
+
         SuccessOutputDto("success", "User successfully added to group")
     }
 
@@ -107,6 +112,7 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
 
         group.flush()
 
+        commit()
 
         SuccessOutputDto("success", "User successfully removed from group")
     }

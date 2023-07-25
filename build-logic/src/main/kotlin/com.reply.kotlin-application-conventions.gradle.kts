@@ -45,6 +45,7 @@ dependencies {
     implementation(ktor("server-host-common"))
     implementation(ktor("client-core"))
     implementation(ktor("client-apache"))
+    implementation(ktor("client-auth"))
     implementation(ktor("serialization-kotlinx-json"))
     implementation(ktor("client-content-negotiation"))
     testImplementation(ktor("server-tests-jvm"))
