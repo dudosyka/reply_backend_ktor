@@ -14,7 +14,6 @@ import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
-import com.reply.libs.dto.client.file.FileDataDto
 import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.dto.client.group.GroupCreateClientDto
 import com.reply.libs.dto.client.group.GroupOutputClientDto
@@ -24,10 +23,8 @@ import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.utils.consul.EmptyBody
 import com.reply.libs.utils.kodein.KodeinController
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.kodein.di.DI

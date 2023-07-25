@@ -4,7 +4,6 @@ import com.reply.file.service.FileService
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
-import com.reply.libs.dto.client.file.FileDataDto
 import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
@@ -16,7 +15,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.kodein.di.DI
 import org.kodein.di.instance
-import java.io.File
 
 class FileController(override val di: DI) : KodeinController() {
     private val fileService: FileService by instance()

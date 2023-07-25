@@ -14,13 +14,10 @@ import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
-import io.ktor.server.routing.*
 import io.ktor.util.logging.*
-import java.io.File
 
-fun main() = EngineMain.main(Array<String>(0) { "" })
+fun main() = EngineMain.main(Array(0) { "" })
 
 fun Application.module() {
     configureSecurity()
