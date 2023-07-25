@@ -46,6 +46,10 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         getAll { BlockModel.company eq authorizedUser.companyId }.asDto()
     }
 
+    suspend fun getAllByCompany(companyId : Int) = transaction{
+        getAll {BlockModel.company eq companyId}.asDto()
+    }
+
     suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall) = newSuspendedTransaction{
         //Checking for the existence of a block
         val block = checkBlock(blockId)

@@ -53,6 +53,10 @@ class BlockController(override val di : DI) : KodeinController() {
                     val blockTokenDto = call.receive<BlockTokenDto>()
                     call.respond<AuthOutputDto>(blockService.getToken(blockTokenDto.userId, blockTokenDto.week, blockTokenDto.blockId, call))
                 }
+                get("company/{companyId}"){
+                    val companyId = call.parameters["companyId"]?.toIntOrNull() ?: throw BadRequestException()
+                    call.respond<List<BlockOutputDto>>(blockService.getAllByCompany(companyId))
+                }
             }
         }
     }

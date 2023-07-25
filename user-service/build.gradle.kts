@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs"))
+    implementation(project(mapOf("path" to ":gateway-service")))
 }
 
 application {

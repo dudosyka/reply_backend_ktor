@@ -1,10 +1,15 @@
 package com.reply.user.controller
 
+import com.reply.gateway.consul.BlockClient
+import com.reply.gateway.consul.TestClient
 import com.reply.libs.config.RBACConfig
+import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
 import com.reply.libs.dto.client.company.CompanyUserDto
+import com.reply.libs.dto.client.group.GroupOutputClientDto
 import com.reply.libs.dto.client.group.GroupOutputDto
+import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.user.service.CompanyService
 import io.ktor.server.application.*

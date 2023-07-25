@@ -39,4 +39,13 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
         commit()
         result.asDto()
     }
+
+    //This method returns link on the file by file_id
+    suspend fun getLink(fileId : Int) = transaction{
+        val filePath = FileDao.findById(fileId)?.path
+        FileOutputDto(
+            fileId,
+            "file/link/${filePath}}"
+        )
+    }
 }

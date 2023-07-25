@@ -50,6 +50,12 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         ).asDto()
     }
 
+    suspend fun getAllByCompany(companyId : Int) : List<TestOutputDto> = transaction{
+        getAll{
+            TestModel.company eq companyId
+        }.asDto()
+    }
+
     suspend fun getByBlock(blockId: Int): List<TestOutputDto> = transaction {
         BlockDao.findById(blockId)?.tests?.asDto() ?: throw BadRequestException()
     }
