@@ -24,30 +24,49 @@ class GroupController(override val di: DI) : KodeinController() {
     override fun Routing.registerRoutes() {
         authenticate(RBACConfig.ADMIN.toString()) {
             route("group") {
+                //CRUD endpoints
                 get {
                     val authorizedUser = getAuthorized(call)
                     call.respond<List<GroupOutputDto>>(groupService.getAllForAuthorized(authorizedUser))
-                }
-                get("{id}") {
-                    val authorizedUser = getAuthorized(call)
-                    val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    call.respond<GroupOutputClientDto>(groupService.get(groupId, authorizedUser))
                 }
                 post {
                     val authorizedUser = getAuthorized(call)
                     val groupCreateDto = call.receive<GroupCreateClientDto>()
                     call.respond<GroupOutputClientDto>(groupService.create(groupCreateDto, authorizedUser))
                 }
-                patch("{id}") {
-                    val authorizedUser = getAuthorized(call)
-                    val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    val groupUpdateDto = call.receive<GroupCreateClientDto>()
-                    call.respond<GroupOutputClientDto>(groupService.update(groupId, groupUpdateDto, authorizedUser))
-                }
-                delete("{id}") {
-                    val authorizedUser = getAuthorized(call)
-                    val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    call.respond<SuccessOutputDto>(groupService.delete(groupId, authorizedUser))
+                route("{id}") {
+                    get {
+                        val authorizedUser = getAuthorized(call)
+                        val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                        call.respond<GroupOutputClientDto>(groupService.get(groupId, authorizedUser))
+                    }
+                    patch {
+                        val authorizedUser = getAuthorized(call)
+                        val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                        val groupUpdateDto = call.receive<GroupCreateClientDto>()
+                        call.respond<GroupOutputClientDto>(groupService.update(groupId, groupUpdateDto, authorizedUser))
+                    }
+                    delete {
+                        val authorizedUser = getAuthorized(call)
+                        val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                        call.respond<SuccessOutputDto>(groupService.delete(groupId, authorizedUser))
+                    }
+                    route("user") {
+                        route("{userId}") {
+                            patch("append") {
+                                val authorizedUser = getAuthorized(call)
+                                val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                                val userId = call.parameters["userId"]?.toIntOrNull() ?: throw BadRequestException()
+                                call.respond<SuccessOutputDto>(groupService.appendUser(groupId, userId, authorizedUser))
+                            }
+                            patch("remove") {
+                                val authorizedUser = getAuthorized(call)
+                                val groupId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
+                                val userId = call.parameters["userId"]?.toIntOrNull() ?: throw BadRequestException()
+                                call.respond<SuccessOutputDto>(groupService.removeUser(groupId, userId, authorizedUser))
+                            }
+                        }
+                    }
                 }
             }
         }

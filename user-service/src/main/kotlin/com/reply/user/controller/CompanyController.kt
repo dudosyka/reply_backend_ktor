@@ -37,6 +37,10 @@ class CompanyController(override val di: DI) : KodeinController() {
                         call.respond<List<GroupOutputDto>>(companyService.getGroups(authorizedUser.companyId, authorizedUser))
                     }
                 }
+                get {
+                    val authorizedUser = getAuthorized(call)
+                    call.respond<CompanyOutputDto>(companyService.get(authorizedUser.companyId, authorizedUser))
+                }
                 patch {
                     val authorizedUser = getAuthorized(call)
                     call.respond<CompanyOutputDto>(companyService.update(authorizedUser.companyId, call.receive<CompanyCreateDto>(), call, authorizedUser))

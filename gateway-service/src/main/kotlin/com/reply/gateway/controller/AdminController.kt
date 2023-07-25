@@ -105,6 +105,12 @@ class AdminController(override val di: DI) : KodeinController() {
                             call.respond(result)
                         }
                     }
+                    get {
+                        val result = userClient.withCall(call) {
+                            get<CompanyOutputDto>()!!
+                        }
+                        call.respond(result)
+                    }
                     patch {
                         val result = userClient.withCall(call) {
                             patch<CompanyCreateDto, CompanyOutputDto>()!!
@@ -120,32 +126,51 @@ class AdminController(override val di: DI) : KodeinController() {
                         }
                         call.respond(result)
                     }
-                    get("{id}") {
-                        val result = userClient.withCall(call) {
-                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            get<GroupOutputClientDto>()!!
-                        }
-                        call.respond(result)
-                    }
                     post {
                         val result = userClient.withCall(call) {
                             post<GroupCreateClientDto, GroupOutputClientDto>()!!
                         }
                         call.respond(result)
                     }
-                    delete("{id}") {
-                        val result = userClient.withCall(call) {
-                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            delete<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                    route("{groupId}") {
+                        get {
+                            val result = userClient.withCall(call) {
+                                call.parameters["groupId"]?.toIntOrNull() ?: throw BadRequestException()
+                                get<GroupOutputClientDto>()!!
+                            }
+                            call.respond(result)
                         }
-                        call.respond(result)
-                    }
-                    patch("{id}") {
-                        val result = userClient.withCall(call) {
-                            call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<GroupCreateClientDto, GroupOutputClientDto>()!!
+                        delete {
+                            val result = userClient.withCall(call) {
+                                call.parameters["groupId"]?.toIntOrNull() ?: throw BadRequestException()
+                                delete<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                            }
+                            call.respond(result)
                         }
-                        call.respond(result)
+                        patch {
+                            val result = userClient.withCall(call) {
+                                call.parameters["groupId"]?.toIntOrNull() ?: throw BadRequestException()
+                                patch<GroupCreateClientDto, GroupOutputClientDto>()!!
+                            }
+                            call.respond(result)
+                        }
+
+                        route("user") {
+                            route("{userId}") {
+                                patch("append") {
+                                    val result = userClient.withCall(call) {
+                                        patch<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                                    }
+                                    call.respond(result)
+                                }
+                                patch("remove") {
+                                    val result = userClient.withCall(call) {
+                                        patch<EmptyBody, SuccessOutputDto>(EmptyBody)!!
+                                    }
+                                    call.respond(result)
+                                }
+                            }
+                        }
                     }
                 }
 

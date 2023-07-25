@@ -17,8 +17,8 @@ import com.reply.user.service.CompanyService
 import com.reply.user.service.GroupService
 import com.reply.user.service.UserService
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.routing.*
 import io.ktor.util.logging.*
 
 fun main() = EngineMain.main(Array<String>(0) { "" })
@@ -51,14 +51,17 @@ fun Application.module() {
 
     }
     DatabaseConnector(UserModel, RoleModel, FileModel, CompanyModel, GroupModel, GroupUsersModel) {}
+    routing {
+        post("/admin/signup") {}
+    }
     install(ConsulServer) {
         serviceName = ApiConfig.userServiceName
         host = "localhost"
-        port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
+//        port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
         consulUrl = "http://localhost:8500"
-        config {
-            port = (environment as ApplicationEngineEnvironment).connectors.first().port
-        }
+//        config {
+//            port = (environment as ApplicationEngineEnvironment).connectors.first().port
+//        }
         registrationConfig {
 //            check(Registration.RegCheck.http("$host:$port${ApiConfig().openEndpoint}/user/health", 120))
         }

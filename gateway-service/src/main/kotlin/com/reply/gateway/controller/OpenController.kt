@@ -6,6 +6,7 @@ import com.reply.libs.dto.client.auth.AuthInputDto
 import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.signup.SignUpInputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.signup.SignUpInputClientDto
 import com.reply.libs.utils.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -31,6 +32,12 @@ class OpenController(override val di: DI) : KodeinController() {
             post("/auth/signup") {
                 val result = userClient.withCall(call) {
                     post<SignUpInputDto, SuccessOutputDto>("auth/admin/signup")!!
+                }
+                call.respond(result)
+            }
+            post("/client/auth/signup") {
+                val result = userClient.withCall(call) {
+                    post<SignUpInputClientDto, SuccessOutputDto>("auth/client/signup")!!
                 }
                 call.respond(result)
             }

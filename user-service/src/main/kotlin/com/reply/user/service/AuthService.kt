@@ -13,6 +13,7 @@ import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.plugins.createToken
 import com.reply.libs.utils.bcrypt.PasswordUtil
 import com.reply.libs.consul.FileServiceClient
+import com.reply.libs.dto.client.signup.SignUpInputClientDto
 import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.utils.database.TransactionalService
 import io.ktor.server.application.*
@@ -67,12 +68,15 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
             throw ForbiddenException("User not found")
         }
     }
+    
+    private fun checkUnique(login: String, email: String, ) {
+        if (!UserDao.find {
+                (UserModel.login eq login) or (UserModel.email eq email)
+            }.empty()) throw DuplicateEntryException("Login and Email must be unique")
+    }
 
     suspend fun signUpAdmin(signUpInputDto: SignUpInputDto, call: ApplicationCall): SuccessOutputDto = transaction {
-        if (!UserDao.find {
-            (UserModel.login eq signUpInputDto.login) or (UserModel.email eq signUpInputDto.email)
-        }.empty()) throw DuplicateEntryException("Login and Email must be unique")
-
+        checkUnique(signUpInputDto.login, signUpInputDto.email)
 
         val company = companyService.create(signUpInputDto.companyData, call)
         val userLogo = fileServiceClient.uploadFile(call, signUpInputDto.avatar)
@@ -85,14 +89,34 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
                     avatar = userLogo.id
                 }
             )
-            SuccessOutputDto(msg = "Successfully signup")
         } catch (e: ExposedSQLException) {
             rollback()
             fileServiceClient.rollbackUploading(call, company.logo)
             fileServiceClient.rollbackUploading(call, userLogo.id)
             throw e
         }
+        commit()
+        SuccessOutputDto(status = "success", msg = "Successfully signup")
+    }
 
-        SuccessOutputDto("", "")
+    suspend fun signUpClient(data: SignUpInputClientDto, call: ApplicationCall): SuccessOutputDto = transaction {
+        checkUnique(data.login, data.email)
+
+        val userLogo = fileServiceClient.uploadFile(call, data.avatar)
+
+        try {
+            userService.create(
+                data.toUserCreateDto().apply {
+                    role = RBACConfig.CLIENT.roleId
+                    avatar = userLogo.id
+                }
+            )
+        } catch (e: ExposedSQLException) {
+            rollback()
+            fileServiceClient.rollbackUploading(call, userLogo.id)
+            throw e
+        }
+        commit()
+        SuccessOutputDto(status = "success", msg = "Successfully signup")
     }
 }
