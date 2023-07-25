@@ -3,7 +3,9 @@ package com.reply.libs.dto.client.signup
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.user.UserCreateDto
 import com.reply.libs.utils.bcrypt.PasswordUtil
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class SignUpInputClientDto (
     val login: String,
     val avatar: FileCreateDto,

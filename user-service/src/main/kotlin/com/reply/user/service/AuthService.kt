@@ -104,6 +104,8 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
 
         val userLogo = fileServiceClient.uploadFile(call, data.avatar)
 
+        commit()
+
         try {
             userService.create(
                 data.toUserCreateDto().apply {

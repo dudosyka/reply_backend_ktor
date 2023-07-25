@@ -68,10 +68,10 @@ class TestGroupUsersManaging: AuthorizedTest() {
     }
 
     @Test
-    fun `Test failed on trying to add user form different company`() {
+    fun `Test failed on trying to add user from different company`() {
         runBlocking {
-            val response = testClient.patch("$globalEndpoint/${group.id}/user/${secondTestClient.id}/remove")
-            assertEquals(HttpStatusCode.Forbidden, response.status)
+            val response = testClient.patch("$globalEndpoint/${group.id}/user/${secondTestClient.id}/append")
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 

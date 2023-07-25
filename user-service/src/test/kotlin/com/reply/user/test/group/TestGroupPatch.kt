@@ -70,7 +70,15 @@ class TestGroupPatch: AuthorizedTest() {
     fun `Test failed if try to patch group from different companies`() {
         runBlocking {
             val adminClient = newAdminRoleClient()
-            val response = adminClient.patch("$globalEndpoint/${group.id}")
+            val response = adminClient.patch("$globalEndpoint/${group.id}") {
+                setBody<GroupCreateClientDto>(
+                    GroupCreateClientDto(
+                        //Fake data
+                        name = "newGroupName",
+                        users = listOf(1212)
+                    )
+                )
+            }
             assertEquals(HttpStatusCode.Forbidden, response.status)
         }
     }
@@ -94,7 +102,15 @@ class TestGroupPatch: AuthorizedTest() {
     @Test
     fun `Test failed on trying to patch group which is not found`() {
         runBlocking {
-            val response = testClient.patch("$globalEndpoint/0")
+            val response = testClient.patch("$globalEndpoint/0") {
+                setBody<GroupCreateClientDto>(
+                    GroupCreateClientDto(
+                        //Fake data
+                        name = "newGroupName",
+                        users = listOf(1212)
+                    )
+                )
+            }
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
     }
