@@ -7,6 +7,7 @@ import com.reply.gateway.controller.AuthorizedController
 import com.reply.gateway.controller.ClientController
 import com.reply.gateway.controller.OpenController
 import com.reply.gateway.consul.UserClient
+import com.reply.libs.consul.FileServiceClient
 import com.reply.libs.plugins.consul.ConsulServer
 import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
@@ -16,7 +17,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
 
-fun main() = EngineMain.main(Array<String>(0) { "" })
+fun main() = EngineMain.main(Array(0) { "" })
 
 fun Application.module() {
     configureSecurity()
@@ -30,6 +31,7 @@ fun Application.module() {
         bindSingleton { UserClient(it) }
         bindSingleton { TestClient(it) }
         bindSingleton { BlockClient(it) }
+        bindSingleton { FileServiceClient(it) }
 
         //Controllers
         bindSingleton { AdminController(it) }

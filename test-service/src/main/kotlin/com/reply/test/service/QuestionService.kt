@@ -6,11 +6,10 @@ import com.reply.libs.dto.client.question.QuestionCreateDto
 import com.reply.libs.dto.client.question.QuestionOutputDto
 import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 
 class QuestionService(override val di: DI): CrudService<QuestionOutputDto, QuestionCreateDto, QuestionDao>(di, QuestionModel, QuestionDao.Companion)  {
-    fun createBatch(testId: Int, questions: MutableList<QuestionCreateDto>): List<QuestionOutputDto> = transaction {
+    suspend fun createBatch(testId: Int, questions: MutableList<QuestionCreateDto>): List<QuestionOutputDto> = transaction {
         insert(questions) {
             this[QuestionModel.title] = it.title
             this[QuestionModel.type] = it.type
@@ -21,7 +20,7 @@ class QuestionService(override val di: DI): CrudService<QuestionOutputDto, Quest
         }.asDto()
     }
 
-    fun updateForTest(testId: Int, questions: MutableList<QuestionCreateDto>) = transaction {
+    suspend fun updateForTest(testId: Int, questions: MutableList<QuestionCreateDto>) = transaction {
         //Delete old questions
         delete {
             QuestionModel.test eq testId

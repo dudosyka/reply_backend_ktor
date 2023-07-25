@@ -3,6 +3,7 @@ package com.reply.block
 import com.reply.block.controller.BlockController
 import com.reply.block.service.BlockService
 import com.reply.gateway.consul.TestClient
+import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.database.models.BlockModel
 import com.reply.libs.database.models.BlockTestsModel
@@ -17,7 +18,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
 
-fun main() = EngineMain.main(Array<String>(0){ "" })
+fun main() = EngineMain.main(Array(0){ "" })
 
 fun Application.module() {
     configureSecurity()
@@ -30,6 +31,7 @@ fun Application.module() {
     kodeinApplication {
         //Consul
         bindSingleton { TestClient(it) }
+        bindSingleton { UserClient(it) }
         //Services
         bindSingleton { BlockService(it) }
         //Controllers
