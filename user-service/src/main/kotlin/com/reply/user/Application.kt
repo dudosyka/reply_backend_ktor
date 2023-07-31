@@ -8,10 +8,7 @@ import com.reply.libs.plugins.consul.ConsulServer
 import com.reply.libs.utils.database.DatabaseConnector
 import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
-import com.reply.user.controller.AuthController
-import com.reply.user.controller.CheckTokenController
-import com.reply.user.controller.CompanyController
-import com.reply.user.controller.GroupController
+import com.reply.user.controller.*
 import com.reply.user.service.AuthService
 import com.reply.user.service.CompanyService
 import com.reply.user.service.GroupService
@@ -39,6 +36,7 @@ fun Application.module() {
         bindSingleton { CheckTokenController(it) }
         bindSingleton { CompanyController(it) }
         bindSingleton { GroupController(it) }
+        bindSingleton { UserController(it) }
 
         //Services
         bindSingleton { AuthService(it) }

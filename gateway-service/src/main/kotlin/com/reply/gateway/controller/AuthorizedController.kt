@@ -4,6 +4,8 @@ import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.auth.AuthorizedUserOutput
+import com.reply.libs.dto.client.user.UserOutputDto
+import com.reply.libs.dto.client.user.UserUpdateDto
 import com.reply.libs.utils.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -27,6 +29,15 @@ class AuthorizedController(override val di: DI) : KodeinController() {
                         get<AuthorizedUserOutput>("authorized")
                     }
                     call.respond(result!!)
+                }
+                route("user") {
+                    patch("{id}") {
+                        val result = userClient.withCall(call) {
+                            patch<UserUpdateDto, UserOutputDto>()
+                        }
+
+                        call.respond(result!!)
+                    }
                 }
             }
         }

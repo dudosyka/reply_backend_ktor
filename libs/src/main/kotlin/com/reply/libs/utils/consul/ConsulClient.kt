@@ -42,6 +42,7 @@ abstract class ConsulClient(val serviceName: String): DIAware {
                     .removePrefix(ApiConfig.adminEndpoint)
                     .removePrefix(ApiConfig.clientEndpoint)
                     .removePrefix(ApiConfig.openEndpoint)
+                    .removePrefix(ApiConfig.authorizedEndpoint)
                     .removePrefix(ApiConfig.mainEndpoint)
 
     suspend inline fun <reified Output> deserializeResponse(response: HttpResponse): Output? {
