@@ -32,6 +32,6 @@ class UserDao(id: EntityID<Int>): BaseIntEntity<UserOutputDto>(id, UserModel) {
     val groups by GroupDao via GroupUsersModel
 
     override fun toOutputDto(): UserOutputDto = UserOutputDto(
-        idValue, login, avatarId, hash, fullname, phone, emailCode, email, roleId.value, coins, companyId
+        idValue, login, avatarId, fullname, phone, email, roleId.value, coins, companyId
     )
 }

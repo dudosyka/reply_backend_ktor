@@ -13,7 +13,7 @@ import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
-import com.reply.libs.dto.client.company.CompanyUserDto
+import com.reply.libs.dto.client.user.CompanyUserDto
 import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.dto.client.group.GroupCreateClientDto
 import com.reply.libs.dto.client.group.GroupOutputClientDto

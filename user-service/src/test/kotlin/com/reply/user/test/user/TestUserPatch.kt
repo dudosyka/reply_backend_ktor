@@ -67,7 +67,6 @@ class TestUserPatch: AuthorizedTest() {
             assertEquals(newLogin, patchBody.phone)
             assertEquals(newLogin, patchBody.fullname)
             assertEquals(null, patchBody.avatar)
-            assertEquals(true, PasswordUtil.compare(newLogin, patchBody.hash))
         }
     }
 

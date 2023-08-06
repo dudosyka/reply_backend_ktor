@@ -4,7 +4,7 @@ package com.reply.user.controller
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
-import com.reply.libs.dto.client.company.CompanyUserDto
+import com.reply.libs.dto.client.user.CompanyUserDto
 import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.user.service.CompanyService

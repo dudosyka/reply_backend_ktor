@@ -1,4 +1,4 @@
-package com.reply.libs.dto.client.company
+package com.reply.libs.dto.client.user
 
 import kotlinx.serialization.Serializable
 
