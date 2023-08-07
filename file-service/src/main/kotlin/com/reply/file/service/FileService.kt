@@ -9,12 +9,12 @@ import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
 import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
-import io.ktor.server.plugins.*
 import io.ktor.util.date.*
 import org.kodein.di.DI
 import java.io.File
 import java.io.IOException
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 
 class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDto, FileDao>(di, FileModel, FileDao.Companion) {
     private fun generateUniqueName(fileName: String): String {
@@ -23,9 +23,13 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
         return "${getTimeMillis()}.$ext"
     }
     suspend fun remove(fileId: Int) = transaction {
-        FileDao.findById(fileId)?.apply {
-            Path("${FileServiceConfig.savePath}/${path}").toFile().delete()
-        }?.delete() ?: throw NotFoundException()
+        (FileDao.findById(fileId)?.apply {
+            val path = Path("${FileServiceConfig.savePath}/${path}")
+            if (path.exists())
+                Path("${FileServiceConfig.savePath}/${path}").toFile().delete()
+            else
+                throw ModelNotFound()
+        } ?: throw ModelNotFound()).delete()
         commit()
     }
 

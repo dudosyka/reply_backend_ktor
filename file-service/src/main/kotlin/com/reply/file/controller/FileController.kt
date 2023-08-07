@@ -4,6 +4,7 @@ import com.reply.file.service.FileService
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
+import com.reply.libs.dto.client.file.FileOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
@@ -30,7 +31,7 @@ class FileController(override val di: DI) : KodeinController() {
 
             val created = fileService.create(fileCreateDto)
 
-            call.respond(created)
+            call.respond<FileOutputDto>(created)
         }
 
         //Only internal requests can remove files without authorization (it used to rollback)
@@ -60,15 +61,12 @@ class FileController(override val di: DI) : KodeinController() {
                     call.respond(SuccessOutputDto(msg = "File successfully removed"))
                 }
             }
+        }
+        authenticate(RBACConfig.AUTHORIZED.toString()) {
             route("file"){
                 get("{fileId}"){
                     val fileId = call.parameters["fileId"]?.toIntOrNull() ?: throw BadRequestException()
                     val file = fileService.getLink(fileId)
-//                    call.response.header(
-//                        HttpHeaders.ContentDisposition,
-//                        ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, "ktor_logo.png")
-//                            .toString()
-//                    )
                     try {
                         call.respondFile(file)
                     } catch (e: IOException) {

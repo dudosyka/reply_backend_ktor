@@ -15,9 +15,12 @@ import io.ktor.serialization.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.util.*
 import org.kodein.di.DIAware
 import io.ktor.util.logging.*
-import io.ktor.utils.io.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import org.kodein.di.instance
 
 abstract class ConsulClient(val serviceName: String): DIAware {
@@ -95,13 +98,22 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         contentType(ContentType.Application.Json)
     }
 
-    suspend fun getFile(url: String = curUri): ByteReadChannel {
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun getFile(url: String = curUri): ByteArray {
         val response = client.request(url) {
             method = HttpMethod.Get
             this.apply(manageRequest(envCall, internal))
         }
 
-        return response.bodyAsChannel()
+        val bytes = response.bodyAsChannel().toByteArray()
+        val error = try {
+           Json.decodeFromStream<ClientException>(bytes.inputStream())
+        } catch (_: Exception) { null }
+
+        if (error != null)
+            throw error
+
+        return bytes
     }
 
     suspend inline fun <reified Input : Any, reified Output> request(

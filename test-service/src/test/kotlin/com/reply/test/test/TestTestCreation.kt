@@ -1,4 +1,4 @@
-package com.reply.tests.test
+package com.reply.test.test
 
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.dto.client.question.QuestionCreateDto
