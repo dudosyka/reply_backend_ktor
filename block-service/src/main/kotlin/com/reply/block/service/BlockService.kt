@@ -49,6 +49,18 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
     suspend fun getAllByCompany(companyId : Int) = transaction{
         getAll {BlockModel.company eq companyId}.asDto()
     }
+    suspend fun getOne(
+        call : ApplicationCall,
+        blockId : Int,
+        authorizedUser : AuthorizedUser
+    ) = newSuspendedTransaction {
+        getOne(blockId).apply {
+            if (company.idValue != authorizedUser.companyId) throw ForbiddenException()}.asDto().apply {
+            tests = testClient.withCall(call) {
+                get<List<TestOutputDto>>("test/block/$blockId")!!
+            }
+        }
+    }
 
     suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall) = newSuspendedTransaction{
         //Checking for the existence of a block
@@ -87,18 +99,6 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         block
     }
 
-    suspend fun getOne(
-        call : ApplicationCall,
-        blockId : Int,
-        authorizedUser : AuthorizedUser
-    ) = newSuspendedTransaction {
-        getOne(blockId).apply {
-            if (company.idValue != authorizedUser.companyId) throw ForbiddenException()}.asDto().apply {
-                tests = testClient.withCall(call) {
-                get<List<TestOutputDto>>("test/block/$blockId")!!
-            }
-        }
-    }
    suspend fun getToken(userId : Int, week : Int, blockId: Int, call: ApplicationCall) : AuthOutputDto = newSuspendedTransaction {
        //Checking for the existence of a block
        checkBlock(blockId)

@@ -58,7 +58,7 @@ class TestController(override val di: DI) : KodeinController() {
                 }
                 post("check/permissions") {
                     testService.checkPermissions(getAuthorized(call), call.receive<TestCheckPermissionsDto>())
-                    call.respond<SuccessOutputDto>(SuccessOutputDto("success", "")) //bob
+                    call.respond<SuccessOutputDto>(SuccessOutputDto("success", ""))
                 }
                 get("company/{companyId}"){
                     val companyID = call.parameters["companyId"]?.toIntOrNull() ?: throw BadRequestException()
