@@ -8,7 +8,7 @@ import com.reply.libs.database.models.GroupModel
 import com.reply.libs.database.models.UserModel
 import com.reply.libs.dto.client.company.CompanyCreateDto
 import com.reply.libs.dto.client.company.CompanyOutputDto
-import com.reply.libs.dto.client.company.CompanyUserDto
+import com.reply.libs.dto.client.user.CompanyUserDto
 import com.reply.libs.dto.client.group.GroupOutputDto
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException

@@ -25,7 +25,7 @@ class TestAdminAuthorization : BaseTest() {
     @Test
     fun `Test bad request`() {
         runBlocking {
-            val signUpResponse = this@TestAdminAuthorization.client.post("${openEndpoint}auth/signup") {}
+            val signUpResponse = client.post("${openEndpoint}auth/signup") {}
 
             assertEquals(HttpStatusCode.UnsupportedMediaType, signUpResponse.status)
         }
@@ -59,7 +59,7 @@ class TestAdminAuthorization : BaseTest() {
 
 
 
-            val checkTokenResponse = this@TestAdminAuthorization.client.get(authorizedEndpoint) {
+            val checkTokenResponse = client.get(authorizedEndpoint) {
                 contentType(ContentType.Application.Json)
                 headers {
                     set("Authorization", "Bearer ${authBody.token}")

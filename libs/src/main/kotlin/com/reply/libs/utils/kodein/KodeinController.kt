@@ -24,10 +24,13 @@ abstract class KodeinController : DIAware {
      */
     abstract fun Routing.registerRoutes()
 
-    fun getAuthorized(call: ApplicationCall) = AuthorizedUser(
-        call.principal<JWTPrincipal>()?.getClaim("id", Int::class)!!,
-        call.principal<JWTPrincipal>()?.getClaim("login", String::class)!!,
-        call.principal<JWTPrincipal>()?.getClaim("role", Int::class)!!,
-        call.principal<JWTPrincipal>()?.getClaim("companyId", Int::class)!!
-    )
+    fun getAuthorized(call: ApplicationCall) = run {
+        println(call.principal<JWTPrincipal>())
+        AuthorizedUser(
+            call.principal<JWTPrincipal>()?.getClaim("id", Int::class)!!,
+            call.principal<JWTPrincipal>()?.getClaim("login", String::class)!!,
+            call.principal<JWTPrincipal>()?.getClaim("role", Int::class)!!,
+            call.principal<JWTPrincipal>()?.getClaim("companyId", Int::class)!!
+        )
+    }
 }

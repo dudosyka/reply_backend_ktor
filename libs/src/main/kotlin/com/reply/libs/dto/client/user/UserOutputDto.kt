@@ -1,22 +1,17 @@
 package com.reply.libs.dto.client.user
 
-import com.reply.libs.dto.client.company.CompanyUserDto
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserOutputDto (
     val id: Int,
-    val login: String,
-    val avatar: Int?,
-    val hash: String,
-    val fullname: String,
-    val phone: String,
-    val emailCode: Int?,
-    val email: String,
+    var login: String,
+    var avatar: Int?,
+    var fullname: String,
+    var phone: String,
+    var email: String,
     val role: Int,
     val coins: Int,
     val company: Int
 ) {
-    fun toCompanyUser(): CompanyUserDto =
-        CompanyUserDto(id, login, fullname)
 }

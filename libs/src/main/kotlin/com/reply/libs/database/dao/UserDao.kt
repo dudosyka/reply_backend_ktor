@@ -13,7 +13,9 @@ class UserDao(id: EntityID<Int>): BaseIntEntity<UserOutputDto>(id, UserModel) {
 
     var login by UserModel.login
     var avatar by FileDao optionalReferencedOn UserModel.avatar
-    val avatarId by UserModel.avatar
+    private val _avatarId by UserModel.avatar
+    val avatarId: Int?
+        get() = _avatarId?.value
     var hash by UserModel.hash
     var fullname by UserModel.fullname
     var phone by UserModel.phone
@@ -30,6 +32,6 @@ class UserDao(id: EntityID<Int>): BaseIntEntity<UserOutputDto>(id, UserModel) {
     val groups by GroupDao via GroupUsersModel
 
     override fun toOutputDto(): UserOutputDto = UserOutputDto(
-        idValue, login, avatarId?.value, hash, fullname, phone, emailCode, email, roleId.value, coins, companyId
+        idValue, login, avatarId, fullname, phone, email, roleId.value, coins, companyId
     )
 }

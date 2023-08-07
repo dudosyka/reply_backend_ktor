@@ -8,5 +8,5 @@ object DatabaseConfig {
     val url: String = mainConfig.property("url").getString()
     val driver: String = mainConfig.property("driver").getString()
     val user: String = mainConfig.property("user").getString()
-    val password: String = mainConfig.property("password").getString()
+    var password: String = mainConfig.property("password").getString()
 }

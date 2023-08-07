@@ -5,10 +5,7 @@ import com.reply.libs.database.dao.GroupDao
 import com.reply.libs.database.dao.UserDao
 import com.reply.libs.database.models.GroupModel
 import com.reply.libs.dto.client.base.SuccessOutputDto
-import com.reply.libs.dto.client.group.GroupCreateClientDto
-import com.reply.libs.dto.client.group.GroupCreateDto
-import com.reply.libs.dto.client.group.GroupOutputClientDto
-import com.reply.libs.dto.client.group.GroupOutputDto
+import com.reply.libs.dto.client.group.*
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.BadRequestException
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
@@ -21,7 +18,7 @@ import org.kodein.di.instance
 class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreateDto, GroupDao>(di, GroupModel, GroupDao.Companion) {
     private val userService: UserService by instance()
     fun getAllForAuthorized(authorizedUser: AuthorizedUser) = getAll { GroupModel.company eq authorizedUser.companyId }.asDto()
-    private suspend fun getOne(groupId: Int, authorizedUser: AuthorizedUser) = transaction {
+    private suspend fun getOne(groupId: Int, authorizedUser: AuthorizedUser): GroupDao = transaction {
         val group = getOne(groupId)
 
         if (group.companyId != authorizedUser.companyId)
@@ -29,6 +26,7 @@ class GroupService(override val di: DI): CrudService<GroupOutputDto, GroupCreate
 
         group
     }
+
     suspend fun get(groupId: Int, authorizedUser: AuthorizedUser) = transaction {
         val group = getOne(groupId)
 

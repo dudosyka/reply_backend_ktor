@@ -5,11 +5,15 @@ import com.reply.libs.database.dao.FileDao
 import com.reply.libs.database.models.FileModel
 import com.reply.libs.dto.client.file.FileCreateDto
 import com.reply.libs.dto.client.file.FileOutputDto
+import com.reply.libs.dto.internal.exceptions.InternalServerError
+import com.reply.libs.dto.internal.exceptions.ModelNotFound
 import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
 import io.ktor.server.plugins.*
 import io.ktor.util.date.*
 import org.kodein.di.DI
+import java.io.File
+import java.io.IOException
 import kotlin.io.path.Path
 
 class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDto, FileDao>(di, FileModel, FileDao.Companion) {
@@ -41,11 +45,11 @@ class FileService(override val di: DI) : CrudService<FileOutputDto, FileCreateDt
     }
 
     //This method returns link on the file by file_id
-    suspend fun getLink(fileId : Int) = transaction{
-        val filePath = FileDao.findById(fileId)?.path
-        FileOutputDto(
-            fileId,
-            "file/link/${filePath}}"
-        )
+    suspend fun getLink(fileId : Int): File = transaction{
+        try {
+            File("${FileServiceConfig.savePath}${FileDao.findById(fileId)?.path ?: throw ModelNotFound("File with id $fileId not found") }")
+        } catch (e: IOException) {
+            throw InternalServerError("File read error")
+        }
     }
 }
