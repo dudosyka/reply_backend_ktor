@@ -16,12 +16,12 @@ import com.reply.libs.dto.client.test.TestCheckPermissionsDto
 import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
+import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.dto.internal.exceptions.ModelNotFound
 import com.reply.libs.utils.crud.CrudService
 import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
 import io.ktor.server.application.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -32,12 +32,17 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         testClient.withCall(call){
             post<TestCheckPermissionsDto, SuccessOutputDto>("test/check/permissions", TestCheckPermissionsDto(createDto.tests))
         }
+
+        val providedTests = TestDao.find { TestModel.id inList createDto.tests }
+        if (providedTests.count() != createDto.tests.size.toLong())
+            throw ModelNotFound("Tests not found")
+
         val dto = BlockDao.new {
             name = createDto.name
             description = createDto.description
             time = createDto.time
             company = CompanyDao[authorizedUser.companyId]
-            tests = TestDao.find { TestModel.id inList createDto.tests }
+            tests = providedTests
         }.toClientOutput()
         commit()
         dto
@@ -54,18 +59,18 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         call : ApplicationCall,
         blockId : Int,
         authorizedUser : AuthorizedUser
-    ) = newSuspendedTransaction {
+    ) = transaction {
         getOne(blockId).apply {
-            if (company.idValue != authorizedUser.companyId) throw ForbiddenException()}.asDto().apply {
+            if (companyId != authorizedUser.companyId) throw ForbiddenException()
+        }.asDto().apply {
             tests = testClient.withCall(call) {
                 get<List<TestOutputDto>>("test/block/$blockId")!!
             }
         }
     }
 
-    suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall) = transaction{
-        //Checking for the existence of a block
-        val block = checkBlock(blockId)
+    suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall): BlockDao = transaction{
+        val block = getById(blockId)
 
         //Checking for the right to change the block
         checkRightToBlock(authorizedUser, block)
@@ -86,46 +91,42 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
 
         commit()
 
-        flush
-    }
-
-
-    suspend fun delete(blockId: Int, authorizedUser : AuthorizedUser): SuccessOutputDto = transaction{
-        getOne(blockId, authorizedUser).delete()
-
-        commit()
-        SuccessOutputDto("success", "Block successfully deleted")
-    }
-
-    private suspend fun  getOne(blockId: Int, authorizedUser: AuthorizedUser) = transaction {
-        val block = getOne(blockId)
-
-        if (block.company.idValue != authorizedUser.companyId) throw ForbiddenException()
+        if (!flush)
+            throw InternalServerError("Block updating failed")
 
         block
     }
 
-   suspend fun getToken(userId : Int, week : Int, blockId: Int, call: ApplicationCall) : AuthOutputDto = newSuspendedTransaction {
-       //Checking for the existence of a block
-       checkBlock(blockId)
 
+    suspend fun delete(blockId: Int, authorizedUser: AuthorizedUser): SuccessOutputDto = transaction{
+        val block = getById(blockId)
 
-       userClient.withCall(call){
+        if (block.companyId != authorizedUser.companyId) throw ForbiddenException()
+
+        block.delete()
+
+        commit()
+        SuccessOutputDto("success", "Block successfully removed")
+    }
+
+    suspend fun getToken(userId : Int, week : Int, blockId: Int, call: ApplicationCall) : AuthOutputDto = transaction {
+        val block = getById(blockId)
+
+        userClient.withCall(call){
             post<BlockTokenDto, AuthOutputDto>("token/block",
                 BlockTokenDto(
-                    blockId =  blockId,
+                    blockId =  block.idValue,
                     week = week,
                     userId = userId
                 )
             )!!
-       }
+        }
    }
-    private fun checkBlock(blockId: Int) : BlockDao{
-        return BlockDao.findById(blockId)?: throw ModelNotFound("Block with id = $blockId not found!")
+    private suspend fun getById(blockId: Int) : BlockDao = transaction {
+        BlockDao.findById(blockId)?: throw ModelNotFound("Block with id = $blockId not found!")
     }
 
     private fun checkRightToBlock(authorizedUser: AuthorizedUser, block: BlockDao){
-        if (authorizedUser.companyId != block.company.idValue) throw ForbiddenException()
+        if (authorizedUser.companyId != block.companyId) throw ForbiddenException()
     }
-
 }

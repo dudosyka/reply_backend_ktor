@@ -16,6 +16,9 @@ class BlockDao(id : EntityID<Int>) : BaseIntEntity<BlockOutputDto>(id, BlockMode
     var description by BlockModel.description
     var time by BlockModel.time
     var company by CompanyDao referencedOn BlockModel.company
+    private val _companyId by BlockModel.company
+    val companyId
+        get() = _companyId.value
     var tests by TestDao via BlockTestsModel
 
     override fun toOutputDto(): BlockOutputDto = BlockOutputDto(

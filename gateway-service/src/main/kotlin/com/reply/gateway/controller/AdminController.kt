@@ -74,7 +74,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     patch("{id}") {
                         val result = testClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<TestCreateDto, SuccessOutputDto>()!!
+                            patch<TestCreateDto, TestOutputDto>()!!
                         }
                         call.respond(result)
                     }
@@ -198,7 +198,7 @@ class AdminController(override val di: DI) : KodeinController() {
                     patch("{id}") {
                         val result = blockClient.withCall(call) {
                             call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                            patch<BlockCreateDto, SuccessOutputDto>()!!
+                            patch<BlockCreateDto, BlockOutputDto>()!!
                         }
                         call.respond(result)
                     }

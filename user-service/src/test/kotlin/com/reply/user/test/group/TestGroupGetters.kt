@@ -20,8 +20,8 @@ class TestGroupGetters: AuthorizedTest() {
 
     private val globalEndpoint = "http://localhost:80${ApiConfig.adminEndpoint}/group"
 
-    val createdGroupName = "New group"
-    val createdGroupUsers = runBlocking {
+    private val createdGroupName = "New group"
+    private val createdGroupUsers = runBlocking {
         listOf<Int>(getTokenData(testClient).id)
     }
     private val group = runBlocking {

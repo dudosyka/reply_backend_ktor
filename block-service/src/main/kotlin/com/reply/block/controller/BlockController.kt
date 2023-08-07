@@ -8,7 +8,7 @@ import com.reply.libs.dto.client.block.BlockCreateDto
 import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
-import com.reply.libs.dto.internal.exceptions.InternalServerError
+import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.kodein.KodeinController
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -39,10 +39,7 @@ class BlockController(override val di : DI) : KodeinController() {
                     val blockId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
                     val updateDto = call.receive<BlockCreateDto>()
                     val result = blockService.patch(updateDto, blockId, getAuthorized(call), call)
-                    if (result)
-                        call.respond<SuccessOutputDto>(SuccessOutputDto("success", "Block successfully updated"))
-                    else
-                        throw InternalServerError("Failed to update block with id = $blockId")
+                    call.respond<BlockOutputDto>(result.asDto())
                 }
                 delete("{id}") {
                     val blockId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()

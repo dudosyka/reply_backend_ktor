@@ -7,5 +7,5 @@ data class BlockCreateDto(
     val name :  String,
     val description: String,
     val time : Int,
-    val tests : List<Int>
+    var tests : List<Int>
 )

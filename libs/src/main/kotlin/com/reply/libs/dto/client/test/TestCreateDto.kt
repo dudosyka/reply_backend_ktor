@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TestCreateDto (
-    val title: String,
+    var title: String,
     val type: Int,
     val formula: String,
     val metric: Int,
