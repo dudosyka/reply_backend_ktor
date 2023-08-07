@@ -26,4 +26,13 @@ object ApiConfig {
     val testServiceName: String = servicesConfig.property("test-service").getString()
     val userServiceName: String = servicesConfig.property("user-service").getString()
     val fileServiceName: String = servicesConfig.property("file-service").getString()
+
+    //Service` ports configuration
+    val blockServicePort: String = servicesConfig.property("block-service").getString()
+    val deliveryServicePort: String = servicesConfig.property("delivery-service").getString()
+    val statServicePort: String = servicesConfig.property("stat-service").getString()
+    val telegramServicePort: String = servicesConfig.property("telegram-service").getString()
+    val testServicePort: String = servicesConfig.property("test-service").getString()
+    val userServicePort: String = servicesConfig.property("user-service").getString()
+    val fileServicePort: String = servicesConfig.property("file-service").getString()
 }

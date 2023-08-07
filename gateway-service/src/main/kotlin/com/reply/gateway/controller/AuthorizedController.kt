@@ -12,7 +12,6 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -46,7 +45,7 @@ class AuthorizedController(override val di: DI) : KodeinController() {
                     val file = fileClient.withCall(call) {
                         getFile()
                     }
-                    call.respondBytes(file.toByteArray())
+                    call.respondBytes(file)
                 }
             }
         }

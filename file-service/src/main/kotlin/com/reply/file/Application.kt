@@ -13,7 +13,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
 
-fun main() = EngineMain.main(Array<String>(0){ "" })
+fun main() = EngineMain.main(Array(0){ "" })
 
 fun Application.module() {
     configureSecurity()
