@@ -15,7 +15,9 @@ class TestDao(id: EntityID<Int>) : BaseIntEntity<TestOutputDto>(id, TestModel) {
     var type by QuestionTypeDao referencedOn TestModel.type
     val typeId by TestModel.type
     var company by CompanyDao optionalReferencedOn TestModel.company
-    val companyId by TestModel.company
+    private val _companyId by TestModel.company
+    val companyId
+        get() = _companyId?.value
     var formula by TestModel.formula
     var author by UserDao optionalReferencedOn TestModel.author
     val authorId by TestModel.author
@@ -27,7 +29,7 @@ class TestDao(id: EntityID<Int>) : BaseIntEntity<TestOutputDto>(id, TestModel) {
         idValue,
         title,
         typeId.value,
-        companyId?.value,
+        companyId,
         formula,
         authorId?.value,
         metricId.value

@@ -6,7 +6,6 @@ import com.reply.libs.dto.client.test.TestCheckPermissionsDto
 import com.reply.libs.dto.client.test.TestCreateDto
 import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
-import com.reply.libs.dto.internal.exceptions.InternalServerError
 import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.kodein.KodeinController
 import com.reply.test.service.TestService
@@ -32,7 +31,7 @@ class TestController(override val di: DI) : KodeinController() {
                 }
                 get("{id}") {
                     val testId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
-                    call.respond<TestOutputDto>(testService.getOne(testId).asDto())
+                    call.respond<TestOutputDto>(testService.getById(getAuthorized(call), testId))
                 }
                 post {
                     val createDto = call.receive<TestCreateDto>()
@@ -47,10 +46,7 @@ class TestController(override val di: DI) : KodeinController() {
                     val testId = call.parameters["id"]?.toIntOrNull() ?: throw BadRequestException()
                     val updateDto = call.receive<TestCreateDto>()
                     val result = testService.patch(updateDto, testId, getAuthorized(call))
-                    if (result)
-                        call.respond<SuccessOutputDto>(SuccessOutputDto("success", "Test successfully updated"))
-                    else
-                        throw InternalServerError("Failed to update test with id = $testId")
+                    call.respond<TestOutputDto>(result.asDto())
                 }
                 get("block/{blockId}"){
                     val blockId = call.parameters["blockId"]?.toIntOrNull() ?: throw BadRequestException()
