@@ -7,7 +7,7 @@ object UserModel: BaseIntIdTable() {
     val avatar = reference("avatar", FileModel).nullable().default(null)
     val hash = varchar("hash", 1024)
     val fullname = text("fullname")
-    val phone = varchar("phone", 32)
+    val phone = varchar("phone", 256)
     val emailCode = integer("emailCode").nullable().default(null)
     val email = varchar("email", 1024).uniqueIndex("unique_email_index")
     val role = reference("role", RoleModel)

@@ -28,18 +28,19 @@ import org.kodein.di.instance
 class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockDao>(di, BlockModel, BlockDao.Companion) {
     private val testClient : TestClient by instance()
     private val userClient : UserClient by instance()
-    suspend fun create(createDto: BlockCreateDto, authorizedUser : AuthorizedUser, call: ApplicationCall) : BlockOutputDto = newSuspendedTransaction {
+    suspend fun create(createDto: BlockCreateDto, authorizedUser : AuthorizedUser, call: ApplicationCall) : BlockOutputDto = transaction {
         testClient.withCall(call){
             post<TestCheckPermissionsDto, SuccessOutputDto>("test/check/permissions", TestCheckPermissionsDto(createDto.tests))
         }
-        BlockDao.new {
+        val dto = BlockDao.new {
             name = createDto.name
             description = createDto.description
             time = createDto.time
             company = CompanyDao[authorizedUser.companyId]
             tests = TestDao.find { TestModel.id inList createDto.tests }
         }.toClientOutput()
-
+        commit()
+        dto
     }
 
     suspend fun getAll(authorizedUser: AuthorizedUser) = transaction {
@@ -62,7 +63,7 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         }
     }
 
-    suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall) = newSuspendedTransaction{
+    suspend fun patch(updateDto: BlockCreateDto, blockId: Int, authorizedUser : AuthorizedUser, call: ApplicationCall) = transaction{
         //Checking for the existence of a block
         val block = checkBlock(blockId)
 
@@ -81,13 +82,18 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
             tests = TestDao.find { TestModel.id inList updateDto.tests }
         }
 
-        block.flush()
+        val flush = block.flush()
+
+        commit()
+
+        flush
     }
 
 
     suspend fun delete(blockId: Int, authorizedUser : AuthorizedUser): SuccessOutputDto = transaction{
         getOne(blockId, authorizedUser).delete()
 
+        commit()
         SuccessOutputDto("success", "Block successfully deleted")
     }
 

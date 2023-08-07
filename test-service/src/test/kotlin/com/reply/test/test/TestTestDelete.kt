@@ -34,7 +34,7 @@ class TestTestDelete : AuthorizedTest() {
                 response.body<SuccessOutputDto>()
             }
             assertEquals("success", body.status)
-            assertEquals("Test successfully deleted", body.msg)
+            assertEquals("Test successfully removed", body.msg)
         }
     }
 
