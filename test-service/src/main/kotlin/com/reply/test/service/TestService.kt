@@ -33,6 +33,8 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
             metric = MetricDao[createDto.metric]
         }
         questionService.createBatch(test.idValue, createDto.questions)
+
+        commit()
         test
     }.toOutputDto()
 
@@ -70,6 +72,8 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
         if ((test.company?.idValue ?: 0) != admin.companyId) throw ForbiddenException()
 
         deleteOne(testId)
+
+        commit()
     }
 
     suspend fun patch(updateDto: TestCreateDto, testId: Int, admin: AuthorizedUser) = transaction {
@@ -93,7 +97,11 @@ class TestService(di: DI) : CrudService<TestOutputDto, TestCreateDto, TestDao>(d
 
         questionService.updateForTest(testId, updateDto.questions)
 
-        test.flush()
+        val flush = test.flush()
+
+        commit()
+
+        flush
     }
 
     suspend fun checkPermissions(authorizedUser: AuthorizedUser, permissionsDto: TestCheckPermissionsDto) {
