@@ -1,5 +1,6 @@
 package com.reply.libs.utils.consul
 
+import com.orbitz.consul.Consul
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.dto.internal.exceptions.ClientException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
@@ -24,16 +25,21 @@ import kotlinx.serialization.json.decodeFromStream
 import org.kodein.di.instance
 
 abstract class ConsulClient(val serviceName: String): DIAware {
-    var client: HttpClient = HttpClient(Apache) {
-        install(ConsulClient) {
-            consulUrl = "http://localhost:8500"
-            serviceName = this@ConsulClient.serviceName
-            loadBalancer(roundRobin())
-        }
-        install(ContentNegotiation) {
-            json()
-        }
+    fun client(): Pair<HttpClient, Consul> {
+        val consul = Consul.builder().withUrl("http://localhost:8500").apply { }.build()
+
+        return Pair(HttpClient(Apache) {
+            install(ConsulClient) {
+                serviceName = this@ConsulClient.serviceName
+                consulClient = consul
+                loadBalancer(roundRobin())
+            }
+            install(ContentNegotiation) {
+                json()
+            }
+        }, consul)
     }
+
     val logger: Logger by instance()
 
     var ignoreResult: Boolean = false
@@ -49,14 +55,14 @@ abstract class ConsulClient(val serviceName: String): DIAware {
                     .removePrefix(ApiConfig.authorizedEndpoint)
                     .removePrefix(ApiConfig.mainEndpoint)
 
-    suspend inline fun <reified Output> deserializeResponse(response: HttpResponse): Output? {
+    suspend inline fun <reified Output> deserializeResponse(response: HttpResponse, client: Pair<HttpClient, Consul>): Output? {
         /*
             Suddenly we can get JsonConvertException because of error object in response,
             so we need to re-run deserialization process with appropriate serializable
 
             if after error deserialization we also got error throw it out to send 500 to the client
         */
-        return if (ignoreResult) {
+        val result = if (ignoreResult) {
             val result = response.bodyAsText()
             logger.info("Request with ignore result received: $result")
             null
@@ -69,6 +75,11 @@ abstract class ConsulClient(val serviceName: String): DIAware {
                 InternalServerError("Failed to retrieve $serviceName")
             }
         }
+
+        client.first.close()
+        client.second.destroy()
+
+        return result
     }
 
     suspend fun <Output> withCall(call: ApplicationCall, block: suspend com.reply.libs.utils.consul.ConsulClient.() -> Output): Output {
@@ -100,7 +111,8 @@ abstract class ConsulClient(val serviceName: String): DIAware {
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun getFile(url: String = curUri): ByteArray {
-        val response = client.request(url) {
+        val client = client()
+        val response = client.first.request(url) {
             method = HttpMethod.Get
             this.apply(manageRequest(envCall, internal))
         }
@@ -112,6 +124,9 @@ abstract class ConsulClient(val serviceName: String): DIAware {
 
         if (error != null)
             throw error
+
+        client.first.close()
+        client.second.destroy()
 
         return bytes
     }
@@ -125,7 +140,8 @@ abstract class ConsulClient(val serviceName: String): DIAware {
         var body: Input? = null
         if (input !is EmptyBody)
             body = input ?: if (requestMethod != HttpMethod.Get) envCall.receive<Input>() else null
-        val response = client.request(url) {
+        val client = client()
+        val response = client.first.request(url) {
             method = requestMethod
             this.apply(manageRequest(envCall, internal))
             if (requestMethod != HttpMethod.Get && body != null)
@@ -133,7 +149,7 @@ abstract class ConsulClient(val serviceName: String): DIAware {
             this.apply(block)
         }
 
-        return deserializeResponse(response)
+        return deserializeResponse(response, client)
     }
 
     suspend inline fun <reified Output> get(

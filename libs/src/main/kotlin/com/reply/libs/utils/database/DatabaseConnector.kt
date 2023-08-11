@@ -12,6 +12,7 @@ class DatabaseConnector(vararg tables: Table, initializer: Transaction.() -> Uni
     init {
         TransactionManager.defaultDatabase = Database.connect(DatabaseConfig.url, driver = DatabaseConfig.driver,
             user = DatabaseConfig.user, password = DatabaseConfig.password)
+
         transaction {
             tables.forEach {
                 SchemaUtils.create(it)

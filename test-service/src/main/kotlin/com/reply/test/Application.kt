@@ -10,7 +10,10 @@ import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import com.reply.libs.plugins.consul.ConsulServer
 import com.reply.libs.utils.database.DatabaseConnector
+import com.reply.test.consul.UserClient
+import com.reply.test.controller.BlockController
 import com.reply.test.controller.TestController
+import com.reply.test.service.BlockService
 import com.reply.test.service.QuestionService
 import com.reply.test.service.TestService
 import io.ktor.server.application.*
@@ -29,11 +32,16 @@ fun Application.module() {
     responseFilter()
     DatabaseConnector(QuestionTypeModel, MetricModel, TestModel, QuestionModel) {}
     kodeinApplication {
+        //Consul
+        bindSingleton { UserClient(it) }
+
         //Controllers
         bindSingleton { TestController(it) }
+        bindSingleton { BlockController(it) }
 
         //Services
         bindSingleton { TestService(it) }
+        bindSingleton { BlockService(it) }
         bindSingleton { QuestionService(it) }
 
         //Logger
