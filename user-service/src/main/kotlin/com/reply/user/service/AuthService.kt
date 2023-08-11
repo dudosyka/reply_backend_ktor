@@ -54,13 +54,13 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
             AuthOutputDto(
                 createToken(
                     mutableMapOf(
-                        "blockId" to data.blockId.toString(),
-                        "week" to data.week.toString(),
-                        "userId" to data.userId.toString(),
-                        "id" to user.idValue.toString(),
+                        "id" to data.userId.toString(),
                         "role" to user.role.idValue.toString(),
                         "login" to user.login,
-                        "companyId" to user.company.idValue.toString()
+                        "companyId" to user.company.idValue.toString(),
+                        //--- block specific data ---
+                        "blockId" to data.blockId.toString(),
+                        "week" to data.week.toString(),
                     )
                 )
             )

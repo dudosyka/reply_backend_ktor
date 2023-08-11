@@ -4,6 +4,7 @@ import com.reply.libs.config.RBACConfig
 import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.block.BlockCreateDto
+import com.reply.libs.dto.client.block.BlockOnPassDto
 import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.block.BlockTokenDto
 import com.reply.libs.dto.internal.exceptions.BadRequestException
@@ -48,12 +49,17 @@ class BlockController(override val di : DI) : KodeinController() {
                 }
                 post("token") {
                     val blockTokenDto = call.receive<BlockTokenDto>()
-                    call.respond<AuthOutputDto>(blockService.getToken(blockTokenDto.userId, blockTokenDto.week, blockTokenDto.blockId, call))
+                    call.respond<AuthOutputDto>(blockService.getToken(blockTokenDto, call, getAuthorized(call)))
                 }
                 get("company/{companyId}"){
                     val companyId = call.parameters["companyId"]?.toIntOrNull() ?: throw BadRequestException()
                     call.respond<List<BlockOutputDto>>(blockService.getAllByCompany(companyId))
                 }
+            }
+        }
+        authenticate(RBACConfig.AUTHORIZED.toString()) {
+            get("block/pass") {
+                call.respond<BlockOnPassDto>(blockService.getOnPass(getAuthorized(call)))
             }
         }
     }

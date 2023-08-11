@@ -30,7 +30,9 @@ abstract class KodeinController : DIAware {
             call.principal<JWTPrincipal>()?.getClaim("id", Int::class)!!,
             call.principal<JWTPrincipal>()?.getClaim("login", String::class)!!,
             call.principal<JWTPrincipal>()?.getClaim("role", Int::class)!!,
-            call.principal<JWTPrincipal>()?.getClaim("companyId", Int::class)!!
+            call.principal<JWTPrincipal>()?.getClaim("companyId", Int::class)!!,
+            call.principal<JWTPrincipal>()?.getClaim("blockId", Int::class),
+            call.principal<JWTPrincipal>()?.getClaim("week", Int::class)
         )
     }
 }
