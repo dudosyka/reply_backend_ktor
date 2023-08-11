@@ -16,8 +16,8 @@ class ConsulClient(private val config: Config) {
         private var loadBalancer: LoadBalancer = takeFirst()
         private var config: Consul.Builder.() -> Unit = {}
 
-        var consulUrl by Delegates.notNull<String>()
         var serviceName: String? = null
+        var consulClient: Consul by Delegates.notNull()
 
         fun loadBalancer(loadBalancer: LoadBalancer) {
             this.loadBalancer = loadBalancer
@@ -28,9 +28,8 @@ class ConsulClient(private val config: Config) {
         }
 
         internal operator fun component1() = loadBalancer
-        internal operator fun component2() = config
-        internal operator fun component3() = consulUrl
-        internal operator fun component4() = serviceName
+        internal operator fun component2() = serviceName
+        internal operator fun component3() = consulClient
     }
 
     companion object Feature : HttpClientPlugin<Config, ConsulClient> {
@@ -41,12 +40,11 @@ class ConsulClient(private val config: Config) {
         override fun prepare(block: Config.() -> Unit) = ConsulClient(Config().apply(block))
 
         override fun install(plugin: ConsulClient, scope: HttpClient) {
-            val (loadBalancer, consulConfig, consulUrl, possibleServiceName) = plugin.config
+            val (loadBalancer, possibleServiceName, consulClient) = plugin.config
 
             scope.requestPipeline.intercept(HttpRequestPipeline.Render) {
                 val serviceName = possibleServiceName ?: context.url.host
 
-                val consulClient = Consul.builder().withUrl(consulUrl).apply(consulConfig).build()
                 val nodes = consulClient.healthClient().getHealthyServiceInstances(serviceName).response
 
                 val selectedNode = checkNotNull(nodes.loadBalancer()) {

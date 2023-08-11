@@ -48,7 +48,7 @@ class AuthService(override val di: DI) : DIAware, TransactionalService {
             throw ForbiddenException("Login not found")
     }
 
-    suspend fun getToken(data : BlockTokenDto) : AuthOutputDto = transaction{
+    suspend fun getToken(data : BlockTokenDto) : AuthOutputDto = transaction {
         try {
             val user = UserDao.find { UserModel.id eq data.userId }.toList().first()
             AuthOutputDto(
