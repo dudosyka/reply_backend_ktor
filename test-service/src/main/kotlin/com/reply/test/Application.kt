@@ -1,5 +1,6 @@
 package com.reply.test
 
+import com.orbitz.consul.model.agent.Registration
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.database.models.MetricModel
 import com.reply.libs.database.models.QuestionModel
@@ -9,6 +10,10 @@ import com.reply.libs.utils.kodein.bindSingleton
 import com.reply.libs.utils.kodein.kodeinApplication
 import com.reply.libs.plugins.*
 import com.reply.libs.plugins.consul.ConsulServer
+import com.reply.libs.utils.consul.FreePortGenerator
+import com.reply.libs.utils.consul.health.HealthCheckController
+import com.reply.libs.utils.consul.health.ServiceStatus
+import com.reply.libs.utils.consul.health.Status
 import com.reply.libs.utils.database.DatabaseConnector
 import com.reply.test.consul.UserClient
 import com.reply.test.controller.BlockController
@@ -21,42 +26,50 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
 
-fun main() = EngineMain.main(Array(0){ "" })
+fun main() {
+    embeddedServer(Netty, port = FreePortGenerator()) {
+        configureSecurity()
+        configureHTTP()
+        configureMonitoring()
+        configureSerialization()
+        configureValidation()
+        responseFilter()
+        DatabaseConnector(QuestionTypeModel, MetricModel, TestModel, QuestionModel) {}
+        kodeinApplication {
+            //Consul
+            bindSingleton { UserClient(it) }
 
-fun Application.module() {
-    configureSecurity()
-    configureHTTP()
-    configureMonitoring()
-    configureSerialization()
-    configureValidation()
-    responseFilter()
-    DatabaseConnector(QuestionTypeModel, MetricModel, TestModel, QuestionModel) {}
-    kodeinApplication {
-        //Consul
-        bindSingleton { UserClient(it) }
+            //Controllers
+            bindSingleton { TestController(it) }
+            bindSingleton { BlockController(it) }
+            bindSingleton { HealthCheckController(it) { ServiceStatus(Status.OK, "Alive") } }
 
-        //Controllers
-        bindSingleton { TestController(it) }
-        bindSingleton { BlockController(it) }
+            //Services
+            bindSingleton { TestService(it) }
+            bindSingleton { BlockService(it) }
+            bindSingleton { QuestionService(it) }
 
-        //Services
-        bindSingleton { TestService(it) }
-        bindSingleton { BlockService(it) }
-        bindSingleton { QuestionService(it) }
-
-        //Logger
-        bindSingleton { KtorSimpleLogger("TestService") }
-    }
-    install(ConsulServer) {
-        serviceName = ApiConfig.testServiceName
-        host = "localhost"
-        port = (this@module.environment as ApplicationEngineEnvironment).connectors[0].port
-        consulUrl = "http://localhost:8500"
-        config {
-            port = (environment as ApplicationEngineEnvironment).connectors.first().port
+            //Logger
+            bindSingleton { KtorSimpleLogger("TestService") }
         }
-        registrationConfig {
-//            check(Registration.RegCheck.http("$host:$port${ApiConfig().openEndpoint}/user/health", 120))
+        environment.monitor.subscribe(ServerReady) { application ->
+            application.apply {
+                install(ConsulServer) {
+                    serviceName = ApiConfig.testServiceName
+                    host = "localhost"
+                    port = FreePortGenerator()
+                    consulUrl = "http://localhost:8500"
+                    registrationConfig {
+                        check(
+                            Registration.RegCheck.http(
+                                "http://host.docker.internal:$port${ApiConfig.openEndpoint}/health",
+                                10,
+                                10
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 }
