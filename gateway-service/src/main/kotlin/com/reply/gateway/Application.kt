@@ -2,11 +2,8 @@ package com.reply.gateway
 
 import com.orbitz.consul.model.agent.Registration
 import com.reply.gateway.consul.TestClient
-import com.reply.gateway.controller.AdminController
-import com.reply.gateway.controller.AuthorizedController
-import com.reply.gateway.controller.ClientController
-import com.reply.gateway.controller.OpenController
 import com.reply.gateway.consul.UserClient
+import com.reply.gateway.controller.*
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.consul.FileServiceClient
 import com.reply.libs.plugins.consul.ConsulServer
@@ -41,6 +38,7 @@ fun Application.module() {
         bindSingleton { ClientController(it) }
         bindSingleton { OpenController(it) }
         bindSingleton { HealthCheckController(it) { ServiceStatus(Status.OK, "") } }
+        bindSingleton { MetricsController(it) }
 
         //Logger
         bindSingleton { KtorSimpleLogger("GatewayService") }

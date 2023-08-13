@@ -9,3 +9,19 @@ services:
       - "3306:3306"
     volumes:
       - ./mariadb/data:/root
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - "3570:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus/
+      - ./prometheus/data:/root
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    links:
+      - prometheus

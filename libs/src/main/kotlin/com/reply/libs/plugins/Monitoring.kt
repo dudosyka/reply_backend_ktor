@@ -1,6 +1,7 @@
 package com.reply.libs.plugins
 
 import com.codahale.metrics.Slf4jReporter
+import com.reply.libs.config.ApiConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.dropwizard.*
@@ -44,7 +45,7 @@ fun Application.configureMonitoring() {
             .start(10, TimeUnit.SECONDS)
     }
     routing {
-        get("/metrics-micrometer") {
+        get("${ApiConfig.openEndpoint}/metrics") {
             call.respond(appMicrometerRegistry.scrape())
         }
     }

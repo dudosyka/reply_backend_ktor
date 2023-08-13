@@ -46,7 +46,7 @@ class AuthorizedController(override val di: DI) : KodeinController() {
                 }
                 get ("file/{fileId}") {
                     val file = fileClient.withCall(call) {
-                        getFile()
+                        proxy()
                     }
                     call.respondBytes(file)
                 }
