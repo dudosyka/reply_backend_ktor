@@ -1,3 +1,5 @@
 package com.reply.libs.test
 
-open class AuthorizedTest: BaseTest()
+open class AuthorizedTest: BaseTest() {
+
+}

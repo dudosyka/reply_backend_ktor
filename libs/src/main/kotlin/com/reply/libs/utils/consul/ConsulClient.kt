@@ -110,7 +110,7 @@ abstract class ConsulClient(val serviceName: String): DIAware {
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun getFile(url: String = curUri): ByteArray {
+    suspend fun proxy(url: String = curUri): ByteArray {
         val client = client()
         val response = client.first.request(url) {
             method = HttpMethod.Get

@@ -1,10 +1,12 @@
 package com.reply.gateway.controller
 
+import com.reply.gateway.consul.TestClient
 import com.reply.gateway.consul.UserClient
 import com.reply.libs.config.ApiConfig
 import com.reply.libs.config.RBACConfig
 import com.reply.libs.consul.FileServiceClient
 import com.reply.libs.dto.client.auth.AuthorizedUserOutput
+import com.reply.libs.dto.client.block.BlockOnPassDto
 import com.reply.libs.dto.client.user.UserOutputDto
 import com.reply.libs.dto.client.user.UserUpdateDto
 import com.reply.libs.utils.kodein.KodeinController
@@ -19,6 +21,7 @@ import org.kodein.di.instance
 class AuthorizedController(override val di: DI) : KodeinController() {
     private val userClient: UserClient by instance()
     private val fileClient: FileServiceClient by instance()
+    private val testClient: TestClient by instance()
 
     /**
      * Method that subtypes must override to register the handled [Routing] routes.
@@ -43,9 +46,15 @@ class AuthorizedController(override val di: DI) : KodeinController() {
                 }
                 get ("file/{fileId}") {
                     val file = fileClient.withCall(call) {
-                        getFile()
+                        proxy()
                     }
                     call.respondBytes(file)
+                }
+                get("block/pass") {
+                    val result = testClient.withCall(call) {
+                        get<BlockOnPassDto>()!!
+                    }
+                    call.respond(result)
                 }
             }
         }

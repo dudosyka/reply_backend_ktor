@@ -138,4 +138,22 @@ open class BaseTest {
         val response = client.get(authorizedEndpoint)
         return response.body<AuthorizedUserOutput>()
     }
+
+    fun createAuthorizedClient(
+        token: String,
+    ): HttpClient = HttpClient(Apache) {
+        install(ContentNegotiation) {
+            json()
+        }
+        defaultRequest {
+            header("Content-Type", "application/json")
+        }
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    BearerTokens(token, token)
+                }
+            }
+        }
+    }
 }

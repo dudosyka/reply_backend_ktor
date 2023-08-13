@@ -1,16 +1,18 @@
 package com.reply.test.service
 
-import com.reply.libs.database.dao.BlockDao
-import com.reply.libs.database.dao.CompanyDao
-import com.reply.libs.database.dao.TestDao
+import com.reply.libs.database.dao.*
 import com.reply.libs.database.models.BlockModel
+import com.reply.libs.database.models.QuestionModel
 import com.reply.libs.database.models.TestModel
 import com.reply.libs.dto.client.auth.AuthOutputDto
 import com.reply.libs.dto.client.base.SuccessOutputDto
 import com.reply.libs.dto.client.block.BlockCreateDto
+import com.reply.libs.dto.client.block.BlockOnPassDto
 import com.reply.libs.dto.client.block.BlockOutputDto
 import com.reply.libs.dto.client.block.BlockTokenDto
+import com.reply.libs.dto.client.question.QuestionOnPassDto
 import com.reply.libs.dto.client.test.TestCheckPermissionsDto
+import com.reply.libs.dto.client.test.TestOnPassDto
 import com.reply.libs.dto.internal.AuthorizedUser
 import com.reply.libs.dto.internal.exceptions.ForbiddenException
 import com.reply.libs.dto.internal.exceptions.InternalServerError
@@ -20,6 +22,7 @@ import com.reply.libs.utils.crud.asDto
 import com.reply.libs.utils.database.idValue
 import com.reply.test.consul.UserClient
 import io.ktor.server.application.*
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -66,7 +69,7 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         val block = getById(blockId)
 
         //Checking for the right to change the block
-        checkRightToBlock(authorizedUser, block)
+        checkPermissions(authorizedUser, block)
 
         //Checking for admission to the specified tests
         testService.checkPermissions(authorizedUser, TestCheckPermissionsDto(updateDto.tests))
@@ -100,15 +103,22 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         SuccessOutputDto("success", "Block successfully removed")
     }
 
-    suspend fun getToken(userId : Int, week : Int, blockId: Int, call: ApplicationCall) : AuthOutputDto = transaction {
-        val block = getById(blockId)
+    suspend fun getToken(blockTokenDto: BlockTokenDto, call: ApplicationCall, authorizedUser: AuthorizedUser) : AuthOutputDto = transaction {
+        val block = getById(blockTokenDto.blockId)
+        val user = UserDao.findById(blockTokenDto.userId) ?: throw ModelNotFound("User with id = ${blockTokenDto.userId}")
+
+        if (user.companyId != authorizedUser.companyId)
+            throw ForbiddenException()
+
+        if (authorizedUser.companyId != block.companyId)
+            throw ForbiddenException()
 
         userClient.withCall(call){
             post<BlockTokenDto, AuthOutputDto>("token/block",
                 BlockTokenDto(
                     blockId =  block.idValue,
-                    week = week,
-                    userId = userId
+                    week = blockTokenDto.week,
+                    userId = blockTokenDto.userId
                 )
             )!!
         }
@@ -117,7 +127,44 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
         BlockDao.findById(blockId)?: throw ModelNotFound("Block with id = $blockId not found!")
     }
 
-    private fun checkRightToBlock(authorizedUser: AuthorizedUser, block: BlockDao){
+    private fun checkPermissions(authorizedUser: AuthorizedUser, block: BlockDao){
         if (authorizedUser.companyId != block.companyId) throw ForbiddenException()
+    }
+
+    suspend fun getOnPass(authorized: AuthorizedUser): BlockOnPassDto = transaction {
+        val blockId = authorized.blockId ?: throw ForbiddenException()
+        val block = BlockDao.findById(blockId) ?: throw ModelNotFound()
+
+        BlockOnPassDto(
+            block.idValue,
+            block.createdAt.toString(),
+            block.updatedAt.toString(),
+            block.name,
+            block.description,
+            block.tests.map {
+                test -> run {
+                    TestOnPassDto(
+                        test.idValue,
+                        test.title,
+                        test.createdAt.toString(),
+                        test.updatedAt.toString(),
+                        test.metricId.value,
+                        QuestionDao.find { QuestionModel.test eq test.idValue }.map {
+                            question -> run {
+                                QuestionOnPassDto(
+                                    question.idValue,
+                                    question.title,
+                                    question.typeId.value,
+                                    question.relative_id,
+                                    Json.decodeFromString(question.value),
+                                    question.coins,
+                                    question.pictureId?.value
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        )
     }
 }
