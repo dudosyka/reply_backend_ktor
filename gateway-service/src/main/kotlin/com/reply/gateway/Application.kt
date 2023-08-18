@@ -1,6 +1,7 @@
 package com.reply.gateway
 
 import com.orbitz.consul.model.agent.Registration
+import com.reply.gateway.consul.StatClient
 import com.reply.gateway.consul.TestClient
 import com.reply.gateway.consul.UserClient
 import com.reply.gateway.controller.*
@@ -31,6 +32,7 @@ fun Application.module() {
         bindSingleton { UserClient(it) }
         bindSingleton { TestClient(it) }
         bindSingleton { FileServiceClient(it) }
+        bindSingleton { StatClient(it) }
 
         //Controllers
         bindSingleton { AdminController(it) }

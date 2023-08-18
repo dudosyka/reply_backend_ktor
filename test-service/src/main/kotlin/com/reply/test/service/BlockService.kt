@@ -148,7 +148,7 @@ class BlockService(di : DI) : CrudService<BlockOutputDto, BlockCreateDto, BlockD
                         test.title,
                         test.createdAt.toString(),
                         test.updatedAt.toString(),
-                        test.metricId.value,
+                        test.metricId,
                         QuestionDao.find { QuestionModel.test eq test.idValue }.map {
                             question -> run {
                                 QuestionOnPassDto(
