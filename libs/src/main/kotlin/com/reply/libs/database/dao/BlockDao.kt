@@ -12,7 +12,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class BlockDao(id : EntityID<Int>) : BaseIntEntity<BlockOutputDto>(id, BlockModel) {
     companion object : BaseIntEntityClass<BlockOutputDto, BlockDao>(BlockModel)
 
-    var name  by BlockModel.name
+    var name by BlockModel.name
     var description by BlockModel.description
     var time by BlockModel.time
     var company by CompanyDao referencedOn BlockModel.company

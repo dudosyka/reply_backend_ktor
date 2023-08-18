@@ -1,5 +1,6 @@
 package com.reply.libs.database.dao
 
+import com.reply.libs.database.models.QuestionModel
 import com.reply.libs.database.models.TestModel
 import com.reply.libs.dto.client.test.TestOutputDto
 import com.reply.libs.utils.database.BaseIntEntity
@@ -22,7 +23,10 @@ class TestDao(id: EntityID<Int>) : BaseIntEntity<TestOutputDto>(id, TestModel) {
     var author by UserDao optionalReferencedOn TestModel.author
     val authorId by TestModel.author
     var metric by MetricDao referencedOn TestModel.metric
-    val metricId by TestModel.metric
+    private val _metricId by TestModel.metric
+    val metricId
+        get() = _metricId.value
+    val questions by QuestionDao referrersOn QuestionModel.test
 
 //    var questions by QuestionDao via QuestionModel
     override fun toOutputDto(): TestOutputDto = transaction { TestOutputDto(
@@ -32,6 +36,6 @@ class TestDao(id: EntityID<Int>) : BaseIntEntity<TestOutputDto>(id, TestModel) {
         companyId,
         formula,
         authorId?.value,
-        metricId.value
+        metricId
     ) }
 }
